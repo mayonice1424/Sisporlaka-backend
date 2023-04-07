@@ -7,6 +7,8 @@ import { verifyToken } from "../middleware/verifyToken.js";
 router.get("/users", verifyToken, getUsers);
 router.post("/users", createNewUser);
 router.post("/login", login);
+// router.patch(`/users/{id}` ,updateUser);
+// router.patch("/users/{id}", verifyToken, updatePassword);
 // router.get("/token", refreshToken);
 
 

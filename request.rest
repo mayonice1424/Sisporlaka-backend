@@ -1,6 +1,5 @@
 GET http://localhost:4000/users
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsInVzZXJuYW1lIjoia2Vwb2xpc2lhbiIsInJvbGUiOiJwb2xpc2kiLCJpYXQiOjE2ODA4NTQ4MDAsImV4cCI6MTY4MDg1NDgyMH0.hR-UVmj8Vfh1z-G3Nyt0Cyv8mgWTeAwh7S9nAguKYq8
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsInVzZXJuYW1lIjoia2Vwb2xpc2lhbiIsInJvbGUiOiJwb2xpc2kiLCJpYXQiOjE2ODA4OTAxNjMsImV4cCI6MTY4MDg5MDE4M30.Zb50Jgn6X903sruLgFJh7vGhPDFOt2Y62TGkMBS5Qgw
 ###
 POST http://localhost:4000/users
 Content-Type: application/json
@@ -22,5 +21,10 @@ Content-Type: application/json
 }
 
 ###
+# PATCH  http://localhost:4000/users/7
+# Content-Type: application/json
 
-
+# {
+#   "username" : "polrestabes",
+#   "role" : "polrestabes"
+# }

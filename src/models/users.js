@@ -3,21 +3,33 @@ import Sequelize from 'sequelize';
 
 const {DataTypes} = Sequelize;
 const usersModel =  db.define('users', {
-    id: { 
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true
-    },
     role :{
         type: DataTypes.STRING,
+        allowNull: false,
+        validate:{
+            notEmpty: true
+        }
     },
     username: {
         type: DataTypes.STRING,
+        allowNull: false,
+        validate:{
+            notEmpty: true
+        }
     },
     password: {
         type: DataTypes.STRING,
+        allowNull: false,validate:{
+            notEmpty: true
+        }
     },
-});
+    refresh_token: {
+        type: DataTypes.TEXT,
+    }
+}, {
+    freezeTableName: true
+}
+);
 export default usersModel;
 
 (

@@ -1,6 +1,5 @@
 GET http://localhost:4000/users
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsInVzZXJuYW1lIjoia2Vwb2xpc2lhbiIsInJvbGUiOiJwb2xpc2kiLCJpYXQiOjE2ODA4OTAxNjMsImV4cCI6MTY4MDg5MDE4M30.Zb50Jgn6X903sruLgFJh7vGhPDFOt2Y62TGkMBS5Qgw
-###
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsInVzZXJuYW1lIjoia2Vwb2xpc2lhbiIsInJvbGUiOiJwb2xpc2kiLCJpYXQiOjE2ODEwNDc4NjgsImV4cCI6MTY4MTEzNDI2OH0.nRM9darFAQAleRO2yvadYgCFB16_h7b-0LZ9t-hLBi8
 POST http://localhost:4000/users
 Content-Type: application/json
 
@@ -14,17 +13,17 @@ Content-Type: application/json
 ###
 POST http://localhost:4000/login
 Content-Type: application/json
-
 {
   "username" : "kepolisian",
   "password" : "polresta"
 }
 
 ###
-# PATCH  http://localhost:4000/users/7
-# Content-Type: application/json
+POST http://localhost:4000/users/change-password
+Authorization:  Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsInVzZXJuYW1lIjoia2Vwb2xpc2lhbiIsInJvbGUiOiJwb2xpc2kiLCJpYXQiOjE2ODEwNDc4NjgsImV4cCI6MTY4MTEzNDI2OH0.nRM9darFAQAleRO2yvadYgCFB16_h7b-0LZ9t-hLBi8
+Content-Type: application/json
 
-# {
-#   "username" : "polrestabes",
-#   "role" : "polrestabes"
-# }
+{
+  "password" : "polresta",
+  "confPassword" : "polrestabes"
+}

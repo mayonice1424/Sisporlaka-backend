@@ -55,36 +55,46 @@ export const getUsers = async (req, res) => {
   }
 }
 
-export const updateUser = async (req, res) => {
-  const { id } = req.params;
-  const { username, role } = req.body;
-  try {
-    const getUser = await usersModel.findOne({
-      where: { id: id }
-    });
-    if (getUser) {
-      const updated = await usersModel.update({ username: username, role: role }, {
-        where: { id: id }
-      });
-      res.status(200).json(  { message: "User berhasil diubah" });
-    } else {
-      res.status(404).json({ message: "User tidak ditemukan" });
-    }
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}
+// export const updateUser = async (req, res) => {
+//   const { id } = req.params;
+//   const { username, role } = req.body;
+//   try {
+//     const getUser = await usersModel.findOne({
+//       where: { id: id }
+//     });
+//     if (getUser) {
+//        await usersModel.update({ username: username, role: role }, {
+//         where: { id: id }
+//       });
+//       res.status(200).json(  { message: "User berhasil diubah" });
+//     } else {
+//       res.status(404).json({ message: "User tidak ditemukan" });
+//     }
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// }
 
 
 export const updatePassword = async (req, res) => {
   try {
+    const oldPassword = req.body.oldPassword;
     const salt = await bcrypt.genSalt(10);
+    const oldPasswordHashed = await bcrypt.hash(oldPassword, salt);
+    const user = await usersModel.findOne({
+      where: {
+        id: req.userId
+      }
+    });
+    const match = await bcrypt.compare(oldPassword, user.password);
+    if (!match) return res.status(400).json({ message: "Password lama tidak cocok" });
     const hashedPassword = await bcrypt.hash( req.body.password, salt);
     const updated = await usersModel.update({ password: hashedPassword }, {
       where: { id: req.userId }
     });
-    if (updated) {
+    if ( match && updated) {
       res.status(200).json({ message: "Password berhasil diubah" });
+      return;
     } else {
       throw new Error("User not found");
     }

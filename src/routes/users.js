@@ -1,4 +1,4 @@
-import {createNewUser, getUsers, login, updateUser, updatePassword} from "../controller/users.js";
+import {createNewUser, getUsers, login, updatePassword} from "../controller/users.js";
 import express from 'express';
 const router = express.Router();
 import { verifyToken } from "../middleware/verifyToken.js";

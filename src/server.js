@@ -7,17 +7,22 @@ import cookieParser from 'cookie-parser';
 dotenv.config();
 
 const PORT = process.env.PORT || 5000
+
 const app = express();
-app.use(cors(
-    {
-        credentials: true,
-        origin: `http://localhost:3000`
-    }
-))
+
+// app.use(cors(
+//     {
+//         credentials: true,
+//         origin: `http://localhost:3000`
+//     }
+// ))
+app.use(cookieParser())
+
 app.use(express.json());
 app.use(usersRoutes);
-app.use(laporanRoutes);
-app.use(cookieParser());
+// app.use(laporanRoutes);
+
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

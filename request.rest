@@ -1,7 +1,9 @@
 
 ### Kepolisian
 GET http://localhost:4000/users
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsInVzZXJuYW1lIjoia2Vwb2xpc2lhbiIsInJvbGUiOiJwb2xpc2kiLCJpYXQiOjE2ODEwNDc4NjgsImV4cCI6MTY4MTEzNDI2OH0.nRM9darFAQAleRO2yvadYgCFB16_h7b-0LZ9t-hLBi8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsInVzZXJuYW1lIjoia2Vwb2xpc2lhbiIsInJvbGUiOiJwb2xpc2kiLCJpYXQiOjE2ODEyNjg1OTQsImV4cCI6MTY4MTI2ODYwOX0.JPPWRAWe_SvCRS9ImHiebf7GFfzTEM82qh3rMLIqpSE
+
+###
 POST http://localhost:4000/users
 Content-Type: application/json
 
@@ -29,8 +31,12 @@ Content-Type: application/json
 
 {
   "oldPassword" : "polresta",
-  "password" : "polrestabes",
-  "confPassword" : "polrestabes"
+  "password" : "polresta",
+  "confPassword" : "polresta"
 }
 
-### 
+###
+GET http://localhost:4000/token
+
+###
+DELETE  http://localhost:4000/logout

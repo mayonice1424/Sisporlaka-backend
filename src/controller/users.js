@@ -29,7 +29,7 @@ export const login = async (req, res) => {
         }
     });
     const match = await bcrypt.compare(req.body.password, user.password);
-    if(!match) return res.status(400).json({msg: "Wrong Password"});
+    if(!match) return res.status(400).json({msg: "Password Salah"});
     const userId = user.id;
     const username = user.username;
     const role = user.role;
@@ -49,7 +49,7 @@ export const login = async (req, res) => {
     });
     res.json({ accessToken });
   } catch (error) {
-    res.status(404).json({ message: "User tidak ditemukan" });
+    res.status(404).json({ msg: "User tidak ditemukan" });
   }
 }
 

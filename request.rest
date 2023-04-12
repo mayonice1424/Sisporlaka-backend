@@ -14,6 +14,50 @@ Content-Type: application/json
   "confPassword" : "polresta"
 }
 
+###
+POST http://localhost:4000/users
+Content-Type: application/json
+
+{
+  "username" : "dishub",
+  "role" : "dinas-perhubungan",
+  "password" : "dinasperhubungan",
+  "confPassword" : "dinasperhubungan"
+}
+
+###
+POST http://localhost:4000/users
+Content-Type: application/json
+
+{
+  "username" : "dinkes",
+  "role" : "dinas-kesehatan",
+  "password" : "dinaskesehatan",
+  "confPassword" : "dinaskesehatan"
+}
+
+###
+POST http://localhost:4000/users
+Content-Type: application/json
+
+{
+  "username" : "rs",
+  "role" : "rumah-sakit",
+  "password" : "rumahsakit",
+  "confPassword" : "rumahsakit"
+}
+
+###
+POST http://localhost:4000/users
+Content-Type: application/json
+
+{
+  "username" : "PTjasaraharja",
+  "role" : "jasa-raharja",
+  "password" : "jasaraharja",
+  "confPassword" : "jasaraharja"
+}
+
 
 ###
 POST http://localhost:4000/login
@@ -23,6 +67,43 @@ Content-Type: application/json
   "username" : "kepolisian",
   "password" : "polresta"
 }
+
+###
+POST http://localhost:4000/login
+Content-Type: application/json
+
+{
+  "username" : "dishub",
+  "password" : "dinasperhubungan"
+}
+
+###
+POST http://localhost:4000/login
+Content-Type: application/json
+
+{
+  "username" : "dinkes",
+  "password" : "dinaskesehatan"
+}
+
+###
+POST http://localhost:4000/login
+Content-Type: application/json
+
+{
+  "username" : "rs",
+  "password" : "rumahsakit"
+}
+
+###
+POST http://localhost:4000/login
+Content-Type: application/json
+
+{
+  "username" : "PTjasaraharja",
+  "password" : "jasaraharja"
+}
+
 
 ###
 POST http://localhost:4000/users/change-password

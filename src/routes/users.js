@@ -9,7 +9,7 @@ router.get("/users", verifyToken, getUsers);
 router.post("/users", createNewUser);
 router.post("/login", login);
 router.get("/token", refreshToken);
-router.get("/logout", logout);
-router.delete(`/users/change-password`, verifyToken, verifyPassword, updatePassword);
+router.delete("/logout", logout);
+router.post(`/users/change-password`, verifyToken, verifyPassword, updatePassword);
 
 export default router;

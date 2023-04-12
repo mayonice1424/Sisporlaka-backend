@@ -1,7 +1,7 @@
 
 ### Kepolisian
 GET http://localhost:4000/users
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsInVzZXJuYW1lIjoia2Vwb2xpc2lhbiIsInJvbGUiOiJwb2xpc2kiLCJpYXQiOjE2ODEyNjg1OTQsImV4cCI6MTY4MTI2ODYwOX0.JPPWRAWe_SvCRS9ImHiebf7GFfzTEM82qh3rMLIqpSE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsInVzZXJuYW1lIjoia2Vwb2xpc2lhbiIsInJvbGUiOiJwb2xpc2kiLCJpYXQiOjE2ODEyNjkwNzYsImV4cCI6MTY4MTI2OTA5Nn0.R8p1HHisZvvM0v1XE3SXja9dZeAx8bnqz13qtBV-T6A
 
 ###
 POST http://localhost:4000/users
@@ -39,4 +39,4 @@ Content-Type: application/json
 GET http://localhost:4000/token
 
 ###
-DELETE  http://localhost:4000/logout
+DELETE http://localhost:4000/logout

@@ -1,7 +1,8 @@
 
 ### Kepolisian
 GET http://localhost:4000/users
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsInVzZXJuYW1lIjoiZGlzaHViIiwicm9sZSI6ImRpbmFzLXBlcmh1YnVuZ2FuIiwiaWF0IjoxNjgxNTcxMTQxLCJleHAiOjE2ODE1NzExNjF9.cDJVL-4rs0eldmcHf8Zupq2Xo9UjDgEg5LXnxKjPAQI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoia2Vwb2xpc2lhbiIsInJvbGUiOiJwb2xpc2kiLCJpYXQiOjE2ODE5Mjk0NDksImV4cCI6MTY4MTkyOTQ2OX0.mIoZ5DjpeN7-GGkynQ2A3AQTHGTTyB4VuBxDXCJr8fY
+
 ###
 POST http://localhost:4000/users
 Content-Type: application/json
@@ -120,3 +121,21 @@ GET http://localhost:4000/token
 
 ###
 DELETE http://localhost:4000/logout
+
+###
+POST http://localhost:4000/laporan
+Content-Type: application/json
+
+{
+ "judul_kejadian": "Kecelakaan",
+ "tanggal": "2021-07-01",
+ "waktu": "12:00",
+ "lokasi": "Jalan Raya",
+ "kerugian_materil": "1000000",
+ "plat_ambulance": "B 1234 ABC",
+ "penyebab": "Kecelakaan",
+ "keterangan": "Kecelakaan di jalan raya"
+}
+
+###
+GET http://localhost:4000/laporan

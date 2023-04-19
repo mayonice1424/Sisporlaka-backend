@@ -30,7 +30,7 @@ export const login = async (req, res) => {
     });
     const match = await bcrypt.compare(req.body.password, user.password);
     if(!match) return res.status(400).json({msg: "Password Salah"});
-    const userId = user.id;
+    const userId = user.id_users;
     const username = user.username;
     const role = user.role;
     const accessToken = jwt.sign({userId, username, role}, process.env.ACCESS_TOKEN_SECRET,{
@@ -41,7 +41,7 @@ export const login = async (req, res) => {
     });
       await usersModel.update({ refresh_token: refreshToken }, 
         {
-           where: { id: user.id} 
+           where: { id_users: user.id_users} 
       });
       res.cookie('refreshToken', refreshToken,{
         httpOnly: true,
@@ -71,14 +71,14 @@ export const updatePassword = async (req, res) => {
     await bcrypt.hash(oldPassword, salt);
     const user = await usersModel.findOne({
       where: {
-        id: req.userId
+        id_users: req.userId
       }
     });
     const match = await bcrypt.compare(oldPassword, user.password);
     if (!match) return res.status(400).json({ message: "Password lama tidak cocok" });
     const hashedPassword = await bcrypt.hash( req.body.password, salt);
     const updated = await usersModel.update({ password: hashedPassword }, {
-      where: { id: req.userId }
+      where: { id_users: req.userId }
     });
     if ( match && updated) {
       res.status(200).json({ message: "Password berhasil diubah" });
@@ -100,9 +100,9 @@ export const logout = async (req, res) => {
     }
   });
   if (!user) return res.status(204);
-  const userId = user.id;
+  const userId = user.id_users;
   await usersModel.update({ refresh_token: null }, {
-    where: { id: userId }
+    where: { id_users: userId }
   });
   res.clearCookie("refreshToken");
   return res.status(200).json({ message: "Logout berhasil" });

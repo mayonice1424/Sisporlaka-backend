@@ -3,6 +3,14 @@ import Sequelize from 'sequelize';
 
 const {DataTypes} = Sequelize;
 const usersModel =  db.define('users', {
+    id_users: {
+        type: DataTypes.NUMBER,
+        autoIncrement: true,
+        primaryKey: true,
+        validate:{
+            notEmpty: true
+        }
+    },
     role :{
         type: DataTypes.STRING,
         allowNull: false,

@@ -5,5 +5,4 @@ const router = express.Router();
 router.post("/laporan", createNewLaporan);
 
 
-
 export default router;

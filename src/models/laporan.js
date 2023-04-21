@@ -4,7 +4,7 @@ import Sequelize from 'sequelize';
 const {DataTypes} = Sequelize;
 const laporanModel =  db.define('laporan', {
     id_laporan: { 
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         validate:{

@@ -4,7 +4,7 @@ import Sequelize from 'sequelize';
 const {DataTypes} = Sequelize;
 const usersModel =  db.define('users', {
     id_users: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         validate:{

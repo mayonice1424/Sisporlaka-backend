@@ -1,9 +1,10 @@
 import laporanModel from "../models/laporan.js";
-
+import db from "../config/database.js";
+import { createNewUser } from "./users.js";
 export const createNewLaporan = async (req, res) => {
   const { judul_kejadian, tanggal, waktu, lokasi, kerugian_materil, plat_ambulance, penyebab, keterangan } = req.body;
   try {
-     await laporanModel.create({
+    const laporan = await laporanModel.create({
       judul_kejadian: judul_kejadian,
       tanggal: tanggal,
       waktu: waktu,
@@ -13,6 +14,7 @@ export const createNewLaporan = async (req, res) => {
       penyebab: penyebab,
       keterangan: keterangan,
     });
+
     res.status(201).json({
       message: "Laporan berhasil dibuat",
     });

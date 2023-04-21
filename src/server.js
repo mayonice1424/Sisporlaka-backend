@@ -22,8 +22,6 @@ app.use(express.json());
 app.use(usersRoutes);
 app.use(laporanRoutes);
 
-
-
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

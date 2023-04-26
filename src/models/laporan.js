@@ -1,6 +1,7 @@
 import db from '../config/database.js';
 import Sequelize from 'sequelize';
-
+import laporanKategoriModel from './laporanKategori.js';
+import kecamatanModel from './kecamatanModel.js';
 const {DataTypes} = Sequelize;
 const laporanModel =  db.define('laporan', {
     id_laporan: { 
@@ -54,10 +55,17 @@ const laporanModel =  db.define('laporan', {
 },{
     freezeTableName: true
 });
+
+laporanKategoriModel.hasMany( laporanModel, { foreignKey: 'id_laporan_kategori' });
+laporanModel.belongsTo( laporanKategoriModel, { foreignKey: 'id_laporan_kategori' });
+
+kecamatanModel.hasMany( laporanModel, { foreignKey: 'id_kecamatan' });
+laporanModel.belongsTo( kecamatanModel, { foreignKey: 'id_kecamatan' });
+
 export default laporanModel;
 
 (
   async () => {
     await db.sync();
-  }
-  )()
+}
+)()

@@ -1,6 +1,5 @@
 import laporanModel from "../models/laporan.js";
-import db from "../config/database.js";
-import { createNewUser } from "./users.js";
+
 export const createNewLaporan = async (req, res) => {
   const { judul_kejadian, tanggal, waktu, lokasi, kerugian_materil, plat_ambulance, penyebab, keterangan } = req.body;
   try {
@@ -13,10 +12,20 @@ export const createNewLaporan = async (req, res) => {
       plat_ambulance: plat_ambulance,
       penyebab: penyebab,
       keterangan: keterangan,
-    });
+    }).then((response) => {
     res.status(201).json({
       message: "Laporan berhasil dibuat",
+      id_laporan: response.id_laporan
     });
+  })} catch (error) {
+    res.status(500).json({ error: error.message });  
+  }
+}
+
+export const getAllLaporan = async (req, res) => {
+  try {
+    const laporan = await laporanModel.findAll();
+    res.status(200).json({ laporan: laporan });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -29,7 +38,12 @@ export const deleteLaporan = async (req, res) => {
       where: { id_laporan: id },
     });
     if (deleted) {
-      return res.status(200).send("Laporan deleted");
+      return res.status(200).json(
+        {
+          message: "Laporan berhasil dihapus",
+          id_laporan: id
+        }
+      );
     }
     throw new Error("Laporan not found");
   } catch (error) {
@@ -49,6 +63,21 @@ export const updateLaporan = async (req, res) => {
     }
     throw new Error("Laporan not found");
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export const getLaporanById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await laporanModel.findOne({
+      where: { id_laporan: id },
+    }).then((response) => {
+      res.status(200).json({ laporan: response });
+    }
+    )
+  }
+  catch (error) {
     res.status(500).json({ error: error.message });
   }
 }

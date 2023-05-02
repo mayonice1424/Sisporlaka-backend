@@ -1,4 +1,7 @@
+import { where } from "sequelize";
+import sequelize from "sequelize";
 import laporanModel from "../models/laporan.js";
+import kecamatanModel from "../models/kecamatanModel.js";
 
 export const createNewLaporan = async (req, res) => {
   const { judul_kejadian, tanggal, waktu, lokasi, kerugian_materil, plat_ambulance, penyebab, keterangan } = req.body;
@@ -78,6 +81,32 @@ export const getLaporanById = async (req, res) => {
     )
   }
   catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export const countLaporan = async (req, res) => {
+  try {
+    const count = await laporanModel.count();
+    res.status(200).json({ count : count});
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export const countLaporanByKecamatan = async (req, res) => {
+  try {
+    const count = await laporanModel.findAll({
+      attributes: ['id_kecamatan', [sequelize.fn('COUNT', 'id_kecamatan'), 'count']],
+      order: [[sequelize.fn('COUNT', 'id_kecamatan'), 'DESC']],
+      group: ['id_kecamatan'],
+      limit : 2,
+      include : kecamatanModel
+    }
+    );
+
+    res.status(200).json({ count : count});
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }

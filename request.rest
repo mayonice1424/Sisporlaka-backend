@@ -129,7 +129,7 @@ Content-Type: application/json
 {
  "judul_kejadian": "Kecelakaan",
  "tanggal": "2021-07-01",
- "waktu": "12:00",
+ "waktu": "12.00",
  "lokasi": "Jalan Raya",
  "kerugian_materil": "1000000",
  "plat_ambulance": "B 1234 ABC",

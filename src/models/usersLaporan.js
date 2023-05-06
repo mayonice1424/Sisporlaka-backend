@@ -20,14 +20,7 @@ const usersLaporanModel = db.define('Users_Laporan', {
     validate: {
       notEmpty: true
     }
-  },
-  nama_pelapor: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    validate: {
-      notEmpty: true
-    }
-  },
+  }
 }, {
   freezeTableName: true
 });

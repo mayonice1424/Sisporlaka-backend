@@ -1,12 +1,14 @@
-import { where } from "sequelize";
-import sequelize from "sequelize";
+import sequelize, { where } from "sequelize";
 import {Op} from "sequelize";
 import laporanModel from "../models/laporan.js";
 import laporanKategoriModel from "../models/laporanKategori.js";
 import kecamatanModel from "../models/kecamatanModel.js";
+import usersModel from "../models/users.js";
+import usersLaporanModel from "../models/usersLaporan.js";
 
 export const createNewLaporan = async (req, res) => {
   const { judul_kejadian, tanggal, waktu, lokasi, kerugian_materil, plat_ambulance, penyebab, keterangan,id_kecamatan } = req.body;
+  const {id_users,status} = req.body;
   try {
     const laporan = await laporanModel.create({
       judul_kejadian: judul_kejadian,
@@ -18,7 +20,13 @@ export const createNewLaporan = async (req, res) => {
       penyebab: penyebab,
       keterangan: keterangan,
       id_kecamatan: id_kecamatan
-    }).then((response) => {
+    })
+    const userLaporan = await usersLaporanModel.create({
+      id_laporan: laporan.id_laporan,
+      id_users: id_users,
+      status: status,
+    })
+    .then((response) => {
     res.status(201).json({
       message: "Laporan berhasil dibuat",
       id_laporan: response.id_laporan
@@ -28,6 +36,21 @@ export const createNewLaporan = async (req, res) => {
   }
 }
 
+export const getUserLaporan = async (req,res ) => {
+  try {
+    const laporan = await laporanModel.findAll({
+      include: [{
+          model: usersModel,
+          attributes: { exclude: ["createdAt, updatedsAt, password", "refresh_token"] }
+      }]
+     });
+     res.status(200).json({users_laporan: laporan })
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+
 export const getAllLaporanBySearch = async (req, res) => {
   try {
     const page = parseInt(req.query.page)|| 0;
@@ -35,8 +58,12 @@ export const getAllLaporanBySearch = async (req, res) => {
     const search = req.query.search_query || '';
     const offset = limit * page;
     const totalRows = await laporanModel.count({
-      include: [kecamatanModel, laporanKategoriModel],
+      include: [
+        {model:kecamatanModel},
+        {model:laporanKategoriModel},
+        {model:usersModel,attributes: { exclude: ["password", "refresh_token"]}}],
       where: {
+        '$users.Users_Laporan.status$':true,
         [Op.or]: [
           {
             judul_kejadian: {
@@ -76,16 +103,22 @@ export const getAllLaporanBySearch = async (req, res) => {
           {
             '$Kecamatan.nama_kecamatan$': {
               [Op.like]: `%${search}%`
-          }
+            }
+          },
+          {
+            '$users.Users_Laporan.status$': true
           }
         ]
       }
     });
     const totalPages = Math.ceil(totalRows / limit);
     const laporan = await laporanModel.findAll({
-      include: [kecamatanModel, laporanKategoriModel],
-      order: [['id_laporan', 'DESC']],
-      where: {
+      include: [
+        {model:kecamatanModel},
+        {model:laporanKategoriModel},
+        {model:usersModel,attributes: { exclude: ["password", "refresh_token"]}}],
+      where: {          
+        '$users.Users_Laporan.status$':true,
         [Op.or]: [
           {
             judul_kejadian: {
@@ -125,12 +158,15 @@ export const getAllLaporanBySearch = async (req, res) => {
           {
             '$Kecamatan.nama_kecamatan$': {
               [Op.like]: `%${search}%`
-          }
-          }
+            }
+          },
+
         ]
       },
+      order: [['id_laporan', 'DESC']],
+      limit: limit,
       offset: offset,
-      limit: limit
+      subQuery:false
     });
     res.status(200).json({
        laporan: laporan,
@@ -147,14 +183,23 @@ export const getAllLaporanBySearch = async (req, res) => {
 export const getAllLaporan = async (req, res) => {
   try {
     const laporan = await laporanModel.findAll({
-      include: [kecamatanModel, laporanKategoriModel],
-      order: [['id_laporan', 'DESC']]
+      include: [
+        {model:kecamatanModel},
+        {model:laporanKategoriModel},
+        {model:usersModel,attributes: { exclude: ["password", "refresh_token"]}}],
+      order: [['id_laporan', 'DESC']],
+      where: {
+        '$Kecamatan.nama_kecamatan$': 'Bumi Waras',
+      }, 
+      limit: 2
     });
     res.status(200).json({ laporan: laporan });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
+
+
 
 export const deleteLaporan = async (req, res) => {
   try {
@@ -226,7 +271,6 @@ export const countLaporanByKecamatan = async (req, res) => {
       include : kecamatanModel
     }
     );
-
     res.status(200).json({ count : count});
   } catch (error) {
     res.status(500).json({ error: error.message });

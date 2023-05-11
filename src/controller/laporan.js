@@ -36,20 +36,6 @@ export const createNewLaporan = async (req, res) => {
   }
 }
 
-export const getUserLaporan = async (req,res ) => {
-  try {
-    const laporan = await laporanModel.findAll({
-      include: [{
-          model: usersModel,
-          attributes: { exclude: ["createdAt, updatedsAt, password", "refresh_token"] }
-      }]
-     });
-     res.status(200).json({users_laporan: laporan })
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}
-
 
 export const getAllLaporanBySearch = async (req, res) => {
   try {
@@ -105,9 +91,6 @@ export const getAllLaporanBySearch = async (req, res) => {
               [Op.like]: `%${search}%`
             }
           },
-          {
-            '$users.Users_Laporan.status$': true
-          }
         ]
       }
     });
@@ -163,7 +146,7 @@ export const getAllLaporanBySearch = async (req, res) => {
 
         ]
       },
-      order: [['id_laporan', 'DESC']],
+      order: [['tanggal', 'DESC']],
       limit: limit,
       offset: offset,
       subQuery:false
@@ -179,6 +162,159 @@ export const getAllLaporanBySearch = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 }
+
+export const getAllLaporanToValidate = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page)|| 0;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search_query || '';
+    const offset = limit * page;
+    const totalRows = await laporanModel.count({
+      include: [
+        {model:kecamatanModel},
+        {model:laporanKategoriModel},
+        {model:usersModel,attributes: { exclude: ["password", "refresh_token"]}}],
+      where: {
+        '$users.Users_Laporan.status$':false,
+        [Op.or]: [
+          {
+            judul_kejadian: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            tanggal: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            waktu: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            lokasi: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            plat_ambulance: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            penyebab: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            keterangan: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            '$Kecamatan.nama_kecamatan$': {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            id_laporan: {
+              [Op.like]: `%${search}%`
+            }
+          }
+        ]
+      }
+    });
+    const totalPages = Math.ceil(totalRows / limit);
+    const laporan = await laporanModel.findAll({
+      include: [
+        {model:kecamatanModel},
+        {model:laporanKategoriModel},
+        {model:usersModel,attributes: { exclude: ["password", "refresh_token"]}}],
+      where: {   
+        '$users.Users_Laporan.status$':false,
+        [Op.or]: [
+          {
+            judul_kejadian: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            tanggal: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            waktu: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            lokasi: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            plat_ambulance: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            penyebab: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            keterangan: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            '$Kecamatan.nama_kecamatan$': {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            id_laporan: {
+              [Op.like]: `%${search}%`
+            }
+          }
+        ]
+      },
+      order: [['tanggal', 'DESC']],
+      limit: limit,
+      offset: offset,
+      subQuery:false
+    });
+    res.status(200).json({
+       laporan: laporan,
+       page:page,
+       limit:limit,
+       totalRows:totalRows,
+       totalPages: totalPages
+       });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// export const getLaporanByIdUser = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const laporan = await usersLaporanModel.findAll({
+//       order: [['id_users_laporan', 'DESC']],
+//       where: {
+//         status:false,
+//       },
+//       attributes:['id_users_laporan'],
+//       subQuery:false
+//     });
+//     res.status(200).json({ Users_Laporan : laporan });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// }
+
 
 export const getAllLaporan = async (req, res) => {
   try {
@@ -200,27 +336,6 @@ export const getAllLaporan = async (req, res) => {
 }
 
 
-
-export const deleteLaporan = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const deleted = await laporanModel.destroy({
-      where: { id_laporan: id },
-    });
-    if (deleted) {
-      return res.status(200).json(
-        {
-          message: "Laporan berhasil dihapus",
-          id_laporan: id
-        }
-      );
-    }
-    throw new Error("Laporan not found");
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}
-
 export const updateLaporan = async (req, res) => {
   try {
     const { id } = req.params;
@@ -236,6 +351,42 @@ export const updateLaporan = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 }
+
+export const deleteLaporan = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await laporanModel.destroy({
+      where: { id_laporan: id },
+    });
+    if (deleted) {
+      const deleteLaporan = await usersLaporanModel.destroy({
+        where: { id_laporan: id },
+      });
+      return res.status(200).json({ message: "Laporan berhasil" , Laporan: deleteLaporan});
+    }
+    throw new Error("Laporan not found");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export const updateStatusLaporan = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [updated] = await usersLaporanModel.update(req.body, {
+      where: { id_users_laporan: id },
+    });
+    if (updated) {
+      const updatedLaporan = await usersLaporanModel.findOne({ where: { id_users_laporan: id, status: false,
+      } });
+      return res.status(200).json({ Users_Laporan: updatedLaporan });
+    }
+    throw new Error("Laporan not found");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 
 export const getLaporanById = async (req, res) => {
   try {
@@ -254,23 +405,62 @@ export const getLaporanById = async (req, res) => {
 
 export const countLaporan = async (req, res) => {
   try {
-    const count = await laporanModel.count();
-    res.status(200).json({ count : count});
+    const countValidate = await laporanModel.count(
+      {include : [usersModel],
+        where: {
+          '$users.Users_Laporan.status$':true,
+      },
+      subQuery:false
+        }
+    );
+    const countNotValidate = await laporanModel.count(
+      {include : [usersModel],
+        where: {
+          '$users.Users_Laporan.status$':false,
+      },
+      subQuery:false
+        }
+    );
+    res.status(200).json({ count : countValidate, countNotValidate : countNotValidate});
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
 
-export const countLaporanByKecamatan = async (req, res) => {
+export const countLaporanByKecamatanValidated = async (req, res) => {
   try {
     const count = await laporanModel.findAll({
       attributes: ['id_kecamatan', [sequelize.fn('COUNT', 'id_kecamatan'), 'count']],
       order: [[sequelize.fn('COUNT', 'id_kecamatan'), 'DESC']],
       group: ['id_kecamatan'],
       limit : 2,
-      include : kecamatanModel
-    }
-    );
+      include : [kecamatanModel,usersModel],
+      where: {
+        '$users.Users_Laporan.status$':true,
+    },
+    subQuery:false
+
+  });
+    res.status(200).json({ count : count});
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export const countLaporanByKecamatanUnValidated = async (req, res) => {
+  try {
+    const count = await laporanModel.findAll({
+      attributes: ['id_kecamatan', [sequelize.fn('COUNT', 'id_kecamatan'), 'count']],
+      order: [[sequelize.fn('COUNT', 'id_kecamatan'), 'DESC']],
+      group: ['id_kecamatan'],
+      limit : 2,
+      include : [kecamatanModel,usersModel],
+      where: {
+        '$users.Users_Laporan.status$':true,
+    },
+    subQuery:false
+
+  });
     res.status(200).json({ count : count});
   } catch (error) {
     res.status(500).json({ error: error.message });

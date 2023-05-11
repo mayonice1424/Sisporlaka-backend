@@ -1,4 +1,4 @@
-import {createNewLaporan,deleteLaporan,updateLaporan,getAllLaporanBySearch, getLaporanById, countLaporan, countLaporanByKecamatan, getAllLaporan, getUserLaporan } from "../controller/laporan.js";
+import {createNewLaporan,deleteLaporan,updateLaporan,getAllLaporanBySearch,  getLaporanById, countLaporan,getAllLaporanToValidate,updateStatusLaporan, countLaporanByKecamatanValidated,countLaporanByKecamatanUnValidated, getAllLaporan } from "../controller/laporan.js";
 import express from 'express';
 const router = express.Router();
 
@@ -8,7 +8,9 @@ router.patch("/laporan/:id", updateLaporan);
 router.get("/laporan", getAllLaporanBySearch);
 router.get('/laporanall', getAllLaporan);
 router.get("/laporan/:id", getLaporanById);
-router.get('/count', countLaporan);
-router.get(`/userlaporan`, getUserLaporan)
-router.get('/countkecamatan', countLaporanByKecamatan);
+router.get('/laporanvalidate', getAllLaporanToValidate);
+router.get('/count', countLaporan );
+router.patch('/laporanstatus/:id', updateStatusLaporan);
+router.get('/countkecamatan', countLaporanByKecamatanValidated);
+router.get('/countkecamatanunvalidated', countLaporanByKecamatanUnValidated);
 export default router;

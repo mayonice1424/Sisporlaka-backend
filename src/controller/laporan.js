@@ -5,10 +5,17 @@ import laporanKategoriModel from "../models/laporanKategori.js";
 import kecamatanModel from "../models/kecamatanModel.js";
 import usersModel from "../models/users.js";
 import usersLaporanModel from "../models/usersLaporan.js";
+import identitasKorbanModel from "../models/identitasKorbanModel.js";
 
 export const createNewLaporan = async (req, res) => {
   const { judul_kejadian, tanggal, waktu, lokasi, kerugian_materil, plat_ambulance, penyebab, keterangan,id_kecamatan } = req.body;
   const {id_users,status} = req.body;
+  const {id_laporan_kategori} = req.body;
+  const {nama,jenis_kelamin,umur, alamat, NIK, nama_rumah_sakit,nomor_rekam_medis} = req.body;
+  const { id_laporan } = req.params;
+  const { kode_icd_10 } = req.body;
+  const { id_luka } = req.body;
+  const { id_skala_triase } = req.body;
   try {
     const laporan = await laporanModel.create({
       judul_kejadian: judul_kejadian,
@@ -19,13 +26,27 @@ export const createNewLaporan = async (req, res) => {
       plat_ambulance: plat_ambulance,
       penyebab: penyebab,
       keterangan: keterangan,
-      id_kecamatan: id_kecamatan
+      id_kecamatan: id_kecamatan,
+      id_laporan_kategori: id_laporan_kategori
     })
     const userLaporan = await usersLaporanModel.create({
       id_laporan: laporan.id_laporan,
       id_users: id_users,
       status: status,
     })
+    const identitasKorban = await identitasKorbanModel.create({
+      id_laporan: laporan.id_laporan,
+      nama: nama,
+      jenis_kelamin: jenis_kelamin,
+      umur: umur,
+      alamat: alamat,
+      NIK: NIK,
+      nama_rumah_sakit: nama_rumah_sakit,
+      nomor_rekam_medis: nomor_rekam_medis,
+      kode_icd_10: kode_icd_10,
+      id_luka: id_luka,
+      id_skala_triase: id_skala_triase
+    }) 
     .then((response) => {
     res.status(201).json({
       message: "Laporan berhasil dibuat",
@@ -35,7 +56,6 @@ export const createNewLaporan = async (req, res) => {
     res.status(500).json({ error: error.message });  
   }
 }
-
 
 export const getAllLaporanBySearch = async (req, res) => {
   try {
@@ -336,22 +356,6 @@ export const getAllLaporan = async (req, res) => {
 }
 
 
-export const updateLaporan = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const [updated] = await laporanModel.update(req.body, {
-      where: { id_laporan: id },
-    });
-    if (updated) {
-      const updatedLaporan = await laporanModel.findOne({ where: { id_laporan: id } });
-      return res.status(200).json({ laporan: updatedLaporan });
-    }
-    throw new Error("Laporan not found");
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}
-
 export const deleteLaporan = async (req, res) => {
   try {
     const { id } = req.params;
@@ -433,7 +437,6 @@ export const countLaporanByKecamatanValidated = async (req, res) => {
       attributes: ['id_kecamatan', [sequelize.fn('COUNT', 'id_kecamatan'), 'count']],
       order: [[sequelize.fn('COUNT', 'id_kecamatan'), 'DESC']],
       group: ['id_kecamatan'],
-      limit : 2,
       include : [kecamatanModel,usersModel],
       where: {
         '$users.Users_Laporan.status$':true,
@@ -466,3 +469,175 @@ export const countLaporanByKecamatanUnValidated = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 }
+
+// export const patchLaporan = async (req, res) => {
+//   const { id } = req.params;
+//   const { id_users } = req.body;
+//   const {status} = false;
+//   const { judul_kejadian, tanggal, waktu, lokasi, kerugian_materil, plat_ambulance, penyebab, keterangan, id_kecamatan } = req.body;
+//   try {
+//     const laporan = await laporanModel.update({
+//       judul_kejadian,
+//       tanggal,
+//       waktu,
+//       lokasi,
+//       kerugian_materil,
+//       plat_ambulance,
+//       penyebab,
+//       keterangan,
+//       id_kecamatan
+//     }, {
+//       where: {
+//         id_laporan: id
+//       }
+//     });
+//     const usersLaporan = await usersLaporanModel.findOrCreate({
+//       where: {
+//         id_users,
+//         id_laporan: id,
+//       },
+//       defaults: {
+//         id_users,
+//         id_laporan: id,
+//         status: false  
+//       },
+//     });
+//     if (!usersLaporan[1]) { 
+//       await usersLaporanModel.update({ status: false }, {
+//         where: {
+//           id_users_laporan: usersLaporan[0].id_users_laporan
+//         }
+//       });
+//       usersLaporan[0].status = false;
+//     }
+//     res.status(201).json({
+//       message: "Laporan berhasil diubah",
+//       laporan,
+//       usersLaporan
+//     });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+// export const patchLaporan = async (req, res) => {
+//   const { id } = req.params;
+//   const { id_users } = req.body;
+//   const {status} = false;
+//   const { judul_kejadian, tanggal, waktu, lokasi, kerugian_materil, plat_ambulance, penyebab, keterangan, id_kecamatan } = req.body;
+//   try {
+//     const laporan = await laporanModel.update({
+//       judul_kejadian,
+//       tanggal,
+//       waktu,
+//       lokasi,
+//       kerugian_materil,
+//       plat_ambulance,
+//       penyebab,
+//       keterangan,
+//       id_kecamatan
+//     }, {
+//       where: {
+//         id_laporan: id
+//       }
+//     });
+//     const usersLaporan = await usersLaporanModel.create({
+//         id_users : id_users,
+//         id_laporan: id,
+//         status: false
+//     });
+//     res.status(201).json({
+//       message: "Laporan berhasil diubah",
+//       laporan,
+//       usersLaporan
+//     });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+
+export const getUsersLaporan = async (req, res) => {
+  try {
+    const usersLaporan = await usersLaporanModel.findAll({
+      include: [
+        {model:laporanModel},
+        {model:usersModel,attributes: { exclude: ["password", "refresh_token"]}}],
+      order: [['id_laporan', 'DESC']],
+    });
+    res.status(200).json({ usersLaporan: usersLaporan });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export const updateLaporan = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [updated] = await laporanModel.update(req.body, {
+      where: { id_laporan: id },
+    });
+    if (updated) {
+      const updatedLaporan = await usersLaporanModel.update(
+        { status: false },
+        { where: { id_laporan: id } }
+      );
+      const updateIdentitasKorban = await identitasKorbanModel.update(req.body, {
+        where: { id_laporan: id },
+      });
+      return res.status(200).json({ laporan: updated });
+    }
+    throw new Error("Laporan not found");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// const { judul_kejadian, tanggal, waktu, lokasi, kerugian_materil, plat_ambulance, penyebab, keterangan,id_kecamatan } = req.body;
+//   const {id_users,status} = req.body;
+//   const {id_laporan_kategori} = req.body;
+//   const {nama,jenis_kelamin,umur, alamat, NIK, nama_rumah_sakit,nomor_rekam_medis} = req.body;
+//   const { id_laporan } = req.params;
+//   const { kode_icd_10 } = req.body;
+//   const { id_luka } = req.body;
+//   const { id_skala_triase } = req.body;
+//   try {
+//     const laporan = await laporanModel.create({
+//       judul_kejadian: judul_kejadian,
+//       tanggal: tanggal,
+//       waktu: waktu,
+//       lokasi: lokasi,
+//       kerugian_materil: kerugian_materil,
+//       plat_ambulance: plat_ambulance,
+//       penyebab: penyebab,
+//       keterangan: keterangan,
+//       id_kecamatan: id_kecamatan,
+//       id_laporan_kategori: id_laporan_kategori
+//     })
+//     const userLaporan = await usersLaporanModel.create({
+//       id_laporan: laporan.id_laporan,
+//       id_users: id_users,
+//       status: status,
+//     })
+//     const identitasKorban = await identitasKorbanModel.create({
+//       id_laporan: laporan.id_laporan,
+//       nama: nama,
+//       jenis_kelamin: jenis_kelamin,
+//       umur: umur,
+//       alamat: alamat,
+//       NIK: NIK,
+//       nama_rumah_sakit: nama_rumah_sakit,
+//       nomor_rekam_medis: nomor_rekam_medis,
+//       kode_icd_10: kode_icd_10,
+//       id_luka: id_luka,
+//       id_skala_triase: id_skala_triase
+//     }) 
+//     .then((response) => {
+//     res.status(201).json({
+//       message: "Laporan berhasil dibuat",
+//       id_laporan: response.id_laporan
+//     });
+//   })} catch (error) {
+//     res.status(500).json({ error: error.message });  
+//   }
+// }

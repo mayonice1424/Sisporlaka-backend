@@ -3,6 +3,7 @@ import Sequelize from 'sequelize';
 import laporanModel from './laporan.js';
 import icd10Model from './icd-10Model.js';
 import lukaModel from './lukaModel.js';
+import skalaTriaseModel from './skalaTriase.js';
 const { DataTypes } = Sequelize;
 const identitasKorbanModel = db.define('Identitas_Korban', {
   id_identitas_korban: {
@@ -61,13 +62,6 @@ const identitasKorbanModel = db.define('Identitas_Korban', {
     validate: {
       notEmpty: true
     }
-  },
-  skala_triase: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    validate: {
-      notEmpty: true
-    }
   }
 }, {
   freezeTableName: true
@@ -82,6 +76,8 @@ identitasKorbanModel.belongsTo( icd10Model, { foreignKey: 'kode_icd_10' });
 lukaModel.hasMany( identitasKorbanModel, { foreignKey: 'id_luka' });
 identitasKorbanModel.belongsTo( lukaModel, { foreignKey: 'id_luka' });
 
+skalaTriaseModel.hasMany( identitasKorbanModel, { foreignKey: 'id_skala_triase' });
+identitasKorbanModel.belongsTo( skalaTriaseModel, { foreignKey: 'id_skala_triase' });
 export default identitasKorbanModel;
 
 

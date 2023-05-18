@@ -11,7 +11,6 @@ import identitasKorbanRoutes from './routes/identitasKorban.js'
 
 import cookieParser from 'cookie-parser';
 import santunanModel from './models/santunanModels.js';
-import laporanPengemudiRoutes from './routes/laporanPengemudi.js';
 import identitasSantunanModel from './models/identitasSantunanModel.js';
 dotenv.config();
 
@@ -34,7 +33,6 @@ app.use(lukaRoutes)
 app.use(icd10Routes);
 app.use(kecamatanRoutes)
 app.use(laporanKategoriRoutes)
-app.use(laporanPengemudiRoutes)
 app.use(identitasKorbanRoutes)
 app.use(santunanModel)
 app.use(identitasSantunanModel)

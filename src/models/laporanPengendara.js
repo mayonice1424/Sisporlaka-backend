@@ -12,28 +12,28 @@ const laporanPengemudiModel = db.define('Laporan_Pengemudi', {
       notEmpty: true
     }
   },
-  nama: {
+  nama_pengemudi: {
     type: DataTypes.STRING,
     allowNull: true,
     validate: {
       notEmpty: true
     }
   },
-  jenis_kelamin: {
+  jenis_kelamin_pengemudi: {
     type: DataTypes.STRING,
     allowNull: true,
     validate: {
       notEmpty: true
     }
   },
-  umur: {
+  umur_pengemudi: {
     type: DataTypes.INTEGER,
     allowNull: true,
     validate: {
       notEmpty: true
     }
   },
-  alamat: {
+  alamat_pengemudi: {
     type: DataTypes.STRING,
     allowNull: true,
     validate: {
@@ -41,14 +41,14 @@ const laporanPengemudiModel = db.define('Laporan_Pengemudi', {
     }
   },
   no_sim: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     allowNull: true,
     validate: {
       notEmpty: true
     }
   },
   no_STNK: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     allowNull: true,
     validate: {
       notEmpty: true

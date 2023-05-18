@@ -42,6 +42,13 @@ const identitasKorbanModel = db.define('Identitas_Korban', {
       notEmpty: true
     }
   },
+  plat_ambulance: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      notEmpty: true
+    }
+  },
   NIK: {
     type: DataTypes.STRING,
     allowNull: true,

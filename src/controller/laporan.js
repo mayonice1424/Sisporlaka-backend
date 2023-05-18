@@ -6,16 +6,12 @@ import kecamatanModel from "../models/kecamatanModel.js";
 import usersModel from "../models/users.js";
 import usersLaporanModel from "../models/usersLaporan.js";
 import identitasKorbanModel from "../models/identitasKorbanModel.js";
+import laporanPengemudiModel from "../models/laporanPengendara.js";
 
 export const createNewLaporan = async (req, res) => {
-  const { judul_kejadian, tanggal, waktu, lokasi, kerugian_materil, plat_ambulance, penyebab, keterangan,id_kecamatan } = req.body;
+  const { judul_kejadian, tanggal, waktu, lokasi, kerugian_materil, penyebab, keterangan,id_kecamatan } = req.body;
   const {id_users,status} = req.body;
   const {id_laporan_kategori} = req.body;
-  const {nama,jenis_kelamin,umur, alamat, NIK, nama_rumah_sakit,nomor_rekam_medis} = req.body;
-  const { id_laporan } = req.params;
-  const { kode_icd_10 } = req.body;
-  const { id_luka } = req.body;
-  const { id_skala_triase } = req.body;
   try {
     const laporan = await laporanModel.create({
       judul_kejadian: judul_kejadian,
@@ -23,7 +19,6 @@ export const createNewLaporan = async (req, res) => {
       waktu: waktu,
       lokasi: lokasi,
       kerugian_materil: kerugian_materil,
-      plat_ambulance: plat_ambulance,
       penyebab: penyebab,
       keterangan: keterangan,
       id_kecamatan: id_kecamatan,
@@ -33,19 +28,6 @@ export const createNewLaporan = async (req, res) => {
       id_laporan: laporan.id_laporan,
       id_users: id_users,
       status: status,
-    })
-    const identitasKorban = await identitasKorbanModel.create({
-      id_laporan: laporan.id_laporan,
-      nama: nama,
-      jenis_kelamin: jenis_kelamin,
-      umur: umur,
-      alamat: alamat,
-      NIK: NIK,
-      nama_rumah_sakit: nama_rumah_sakit,
-      nomor_rekam_medis: nomor_rekam_medis,
-      kode_icd_10: kode_icd_10,
-      id_luka: id_luka,
-      id_skala_triase: id_skala_triase
     }) 
     .then((response) => {
     res.status(201).json({
@@ -56,6 +38,50 @@ export const createNewLaporan = async (req, res) => {
     res.status(500).json({ error: error.message });  
   }
 }
+
+export const createDetailLaporan = async (req, res) => {
+  const { identitas_korban, identitas_pengemudi } = req.body;
+  try {
+    const identitasKorbanPromises = identitas_korban.map((korban) =>
+      identitasKorbanModel.create({
+        id_laporan: 2,
+        nama: korban.nama,
+        jenis_kelamin: korban.jenis_kelamin,
+        umur: korban.umur,
+        alamat: korban.alamat,
+        NIK: korban.NIK,
+        plat_ambulance: korban.plat_ambulance,
+        nama_rumah_sakit: korban.nama_rumah_sakit,
+        nomor_rekam_medis: korban.nomor_rekam_medis,
+      })
+    );
+
+    await Promise.all(identitasKorbanPromises);
+
+    if (identitas_pengemudi && Array.isArray(identitas_pengemudi)) {
+      const identitasPengemudiPromises = identitas_pengemudi.map((pengemudi) =>
+        laporanPengemudiModel.create({
+          id_laporan:2,
+          nama_pengemudi: pengemudi.nama_pengemudi,
+          jenis_kelamin_pengemudi: pengemudi.jenis_kelamin_pengemudi,
+          umur_pengemudi: pengemudi.umur_pengemudi,
+          alamat_pengemudi: pengemudi.alamat_pengemudi,
+          no_sim: pengemudi.no_sim,
+          no_STNK: pengemudi.no_STNK
+        })
+      );
+
+      await Promise.all(identitasPengemudiPromises);
+    }
+
+    res.status(201).json({
+      message: "Laporan berhasil dibuat",
+      id_laporan: 2,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 export const getAllLaporanBySearch = async (req, res) => {
   try {
@@ -88,11 +114,6 @@ export const getAllLaporanBySearch = async (req, res) => {
           },
           {
             lokasi: {
-              [Op.like]: `%${search}%`
-            }
-          },
-          {
-            plat_ambulance: {
               [Op.like]: `%${search}%`
             }
           },
@@ -140,11 +161,6 @@ export const getAllLaporanBySearch = async (req, res) => {
           },
           {
             lokasi: {
-              [Op.like]: `%${search}%`
-            }
-          },
-          {
-            plat_ambulance: {
               [Op.like]: `%${search}%`
             }
           },
@@ -218,11 +234,6 @@ export const getAllLaporanToValidate = async (req, res) => {
             }
           },
           {
-            plat_ambulance: {
-              [Op.like]: `%${search}%`
-            }
-          },
-          {
             penyebab: {
               [Op.like]: `%${search}%`
             }
@@ -271,11 +282,6 @@ export const getAllLaporanToValidate = async (req, res) => {
           },
           {
             lokasi: {
-              [Op.like]: `%${search}%`
-            }
-          },
-          {
-            plat_ambulance: {
               [Op.like]: `%${search}%`
             }
           },
@@ -355,7 +361,6 @@ export const getAllLaporan = async (req, res) => {
   }
 }
 
-
 export const deleteLaporan = async (req, res) => {
   try {
     const { id } = req.params;
@@ -364,6 +369,12 @@ export const deleteLaporan = async (req, res) => {
     });
     if (deleted) {
       const deleteLaporan = await usersLaporanModel.destroy({
+        where: { id_laporan: id },
+      });
+      const deleteIdentitasKorban = await identitasKorbanModel.destroy({
+        where: { id_laporan: id },
+      });
+      const deleteIdentitasPelaku = await laporanPengemudiModel.destroy({
         where: { id_laporan: id },
       });
       return res.status(200).json({ message: "Laporan berhasil" , Laporan: deleteLaporan});
@@ -583,6 +594,9 @@ export const updateLaporan = async (req, res) => {
         { where: { id_laporan: id } }
       );
       const updateIdentitasKorban = await identitasKorbanModel.update(req.body, {
+        where: { id_laporan: id },
+      });
+      const updateIdentitasPengemudi = await laporanPengemudiModel.update(req.body, {
         where: { id_laporan: id },
       });
       return res.status(200).json({ laporan: updated });

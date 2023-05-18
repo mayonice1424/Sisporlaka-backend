@@ -35,16 +35,13 @@ const laporanModel =  db.define('laporan', {
     },
     lokasi:{
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         validate:{
             notEmpty: true
         }
     },
     kerugian_materil:{
       type: DataTypes.INTEGER.UNSIGNED,
-    },
-    plat_ambulance:{
-        type: DataTypes.STRING,
     },
     penyebab:{
         type: DataTypes.STRING,

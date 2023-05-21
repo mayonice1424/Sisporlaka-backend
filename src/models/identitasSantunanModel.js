@@ -12,6 +12,13 @@ const identitasSantunanModel = db.define("Identitas_Santunan", {
     validate: {
       notEmpty: true
     }
+  },
+  nominal: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    validate: {
+      notEmpty: true
+    }
   }
 }, {
   freezeTableName: true

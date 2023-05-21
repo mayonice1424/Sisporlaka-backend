@@ -1,9 +1,9 @@
-import {createNewLaporan,deleteLaporan,createDetailLaporan,getAllLaporanBySearch,updateLaporan,  getLaporanById, countLaporan,getAllLaporanToValidate,updateStatusLaporan, countLaporanByKecamatanValidated,countLaporanByKecamatanUnValidated, getAllLaporan } from "../controller/laporan.js";
+import {createNewLaporan,deleteLaporan,createDetailLaporanPolisi,getAllLaporanBySearch,updateLaporan,  getLaporanById, countLaporan,getAllLaporanToValidate,updateStatusLaporan, countLaporanByKecamatanValidated,countLaporanByKecamatanUnValidated, getAllLaporan } from "../controller/laporan.js";
 import express from 'express';
 const router = express.Router();
 
 router.post("/laporan", createNewLaporan);
-router.post("/laporandetail", createDetailLaporan);
+router.post("/laporandetail", createDetailLaporanPolisi);
 router.delete("/laporan/:id", deleteLaporan);
 router.get("/laporan", getAllLaporanBySearch);
 router.get('/laporanall', getAllLaporan);

@@ -39,29 +39,31 @@ export const createNewLaporan = async (req, res) => {
   }
 }
 
-export const createDetailLaporan = async (req, res) => {
-  const { identitas_korban, identitas_pengemudi } = req.body;
+export const createDetailLaporanPolisi = async (req, res) => {
+  const { identitas_korban, identitas_pengemudi, id_laporan } = req.body;
   try {
+    if (identitas_korban && Array.isArray(identitas_korban)) {
     const identitasKorbanPromises = identitas_korban.map((korban) =>
       identitasKorbanModel.create({
-        id_laporan: 2,
+        id_laporan: id_laporan,
         nama: korban.nama,
         jenis_kelamin: korban.jenis_kelamin,
         umur: korban.umur,
         alamat: korban.alamat,
-        NIK: korban.NIK,
         plat_ambulance: korban.plat_ambulance,
+        NIK: korban.NIK,
         nama_rumah_sakit: korban.nama_rumah_sakit,
         nomor_rekam_medis: korban.nomor_rekam_medis,
+        id_luka: korban.id_luka,
       })
     );
 
     await Promise.all(identitasKorbanPromises);
-
+    }
     if (identitas_pengemudi && Array.isArray(identitas_pengemudi)) {
       const identitasPengemudiPromises = identitas_pengemudi.map((pengemudi) =>
         laporanPengemudiModel.create({
-          id_laporan:2,
+          id_laporan: id_laporan,
           nama_pengemudi: pengemudi.nama_pengemudi,
           jenis_kelamin_pengemudi: pengemudi.jenis_kelamin_pengemudi,
           umur_pengemudi: pengemudi.umur_pengemudi,
@@ -76,7 +78,7 @@ export const createDetailLaporan = async (req, res) => {
 
     res.status(201).json({
       message: "Laporan berhasil dibuat",
-      id_laporan: 2,
+      id_laporan: id_laporan,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

@@ -8,9 +8,9 @@ import icd10Routes from './routes/icd10.js'
 import kecamatanRoutes from './routes/kecamatan.js'
 import laporanKategoriRoutes from './routes/kategori.js'
 import identitasKorbanRoutes from './routes/identitasKorban.js'
-
+import skalaTriaseRoutes from './routes/skalaTriase.js'
 import cookieParser from 'cookie-parser';
-import santunanModel from './models/santunanModels.js';
+import santunanRoutes from './routes/santunan.js';
 import identitasSantunanModel from './models/identitasSantunanModel.js';
 dotenv.config();
 
@@ -34,7 +34,8 @@ app.use(icd10Routes);
 app.use(kecamatanRoutes)
 app.use(laporanKategoriRoutes)
 app.use(identitasKorbanRoutes)
-app.use(santunanModel)
+app.use(skalaTriaseRoutes)
+app.use(santunanRoutes)
 app.use(identitasSantunanModel)
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

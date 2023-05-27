@@ -14,53 +14,29 @@ const laporanPengemudiModel = db.define('Laporan_Pengemudi', {
   },
   nama_pengemudi: {
     type: DataTypes.STRING,
-    allowNull: true,
-    validate: {
-      notEmpty: true
-    }
   },
   jenis_kelamin_pengemudi: {
     type: DataTypes.STRING,
-    allowNull: true,
-    validate: {
-      notEmpty: true
-    }
   },
   umur_pengemudi: {
     type: DataTypes.INTEGER,
-    allowNull: true,
-    validate: {
-      notEmpty: true
-    }
   },
   alamat_pengemudi: {
     type: DataTypes.STRING,
-    allowNull: true,
-    validate: {
-      notEmpty: true
-    }
   },
   no_sim: {
     type: DataTypes.INTEGER,
-    allowNull: true,
-    validate: {
-      notEmpty: true
-    }
   },
   no_STNK: {
     type: DataTypes.INTEGER,
-    allowNull: true,
-    validate: {
-      notEmpty: true
-    }
-  }
+}
 }
 , {
   freezeTableName: true
 });
 
-laporanModel.hasMany(laporanPengemudiModel, { foreignKey: { allowNull: false, name:'id_laporan' } });
-laporanPengemudiModel.belongsTo(laporanModel, { foreignKey: { allowNull: false, name:'id_laporan' } });
+laporanModel.hasMany(laporanPengemudiModel, { foreignKey: { name:'id_laporan' } });
+laporanPengemudiModel.belongsTo(laporanModel, { foreignKey: { name:'id_laporan' } });
 export default laporanPengemudiModel;
 
 (async () => {

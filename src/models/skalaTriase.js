@@ -3,17 +3,9 @@ import Sequelize from 'sequelize';
 
 const { DataTypes } = Sequelize;
 const skalaTriaseModel = db.define('Skala_Triase', {
-  id_skala_triase: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true,
-    validate: {
-      notEmpty: true
-    }
-  },
-  skala: {
+  kode_ATS: {
     type: DataTypes.STRING,
-    allowNull: true,
+    primaryKey: true,
     validate: {
       notEmpty: true
     }

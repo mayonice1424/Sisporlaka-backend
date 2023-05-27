@@ -7,7 +7,7 @@ router.post("/laporandetail", createDetailLaporanPolisi);
 router.delete("/laporan/:id", deleteLaporan);
 router.get("/laporan", getAllLaporanBySearch);
 router.get('/laporanall', getAllLaporan);
-router.patch('/laporan/:id', updateLaporan);
+router.put('/laporan/:id', updateLaporan);
 router.get("/laporan/:id", getLaporanById);
 router.get('/laporanvalidate', getAllLaporanToValidate);
 router.get('/count', countLaporan );

@@ -83,11 +83,9 @@ identitasKorbanModel.belongsTo( icd10Model, { foreignKey: 'kode_icd_10' });
 lukaModel.hasMany( identitasKorbanModel, { foreignKey: 'id_luka' });
 identitasKorbanModel.belongsTo( lukaModel, { foreignKey: 'id_luka' });
 
-skalaTriaseModel.hasMany( identitasKorbanModel, { foreignKey: 'id_skala_triase' });
-identitasKorbanModel.belongsTo( skalaTriaseModel, { foreignKey: 'id_skala_triase' });
+skalaTriaseModel.hasMany( identitasKorbanModel, { foreignKey: 'kode_ATS' });
+identitasKorbanModel.belongsTo( skalaTriaseModel, { foreignKey: 'kode_ATS' });
 export default identitasKorbanModel;
-
-
 
 (
   async () => {

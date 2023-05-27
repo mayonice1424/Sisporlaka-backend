@@ -7,7 +7,10 @@ import usersModel from "../models/users.js";
 import usersLaporanModel from "../models/usersLaporan.js";
 import identitasKorbanModel from "../models/identitasKorbanModel.js";
 import laporanPengemudiModel from "../models/laporanPengendara.js";
-
+import identitasSantunanModel from "../models/identitasSantunanModel.js";
+import lukaModel from "../models/lukaModel.js";
+import santunanModel from "../models/santunanModels.js";
+import skalaTriaseModel from "../models/skalaTriase.js";
 export const createNewLaporan = async (req, res) => {
   const { judul_kejadian, tanggal, waktu, lokasi, kerugian_materil, penyebab, keterangan,id_kecamatan } = req.body;
   const {id_users,status} = req.body;
@@ -41,49 +44,62 @@ export const createNewLaporan = async (req, res) => {
 
 export const createDetailLaporanPolisi = async (req, res) => {
   const { identitas_korban, identitas_pengemudi, id_laporan } = req.body;
+
   try {
     if (identitas_korban && Array.isArray(identitas_korban)) {
-    const identitasKorbanPromises = identitas_korban.map((korban) =>
-      identitasKorbanModel.create({
-        id_laporan: id_laporan,
-        nama: korban.nama,
-        jenis_kelamin: korban.jenis_kelamin,
-        umur: korban.umur,
-        alamat: korban.alamat,
-        plat_ambulance: korban.plat_ambulance,
-        NIK: korban.NIK,
-        nama_rumah_sakit: korban.nama_rumah_sakit,
-        nomor_rekam_medis: korban.nomor_rekam_medis,
-        id_luka: korban.id_luka,
-      })
-    );
+      const identitasKorbanPromises = identitas_korban.map(async (korban) => {
+        const createdIdentitasKorban = await identitasKorbanModel.create({
+          id_laporan: id_laporan,
+          nama: korban.nama,
+          jenis_kelamin: korban.jenis_kelamin,
+          umur: parseInt(korban.umur), // Mengubah umur menjadi angka dengan parseInt
+          alamat: korban.alamat,
+          plat_ambulance: korban.plat_ambulance,
+          NIK: korban.NIK,
+          nama_rumah_sakit: korban.nama_rumah_sakit,
+          nomor_rekam_medis: korban.nomor_rekam_medis,
+          id_luka: parseInt(korban.id_luka), // Mengubah id_luka menjadi angka dengan parseInt
+          kode_ATS: korban.kode_ATS,
+        });
 
-    await Promise.all(identitasKorbanPromises);
+        if (korban.identitas_santunan && Array.isArray(korban.identitas_santunan)) {
+          const santunanPromises = korban.identitas_santunan.map((santunan) => {
+            return identitasSantunanModel.create({
+              id_identitas_korban: createdIdentitasKorban.id_identitas_korban,
+              nominal: santunan.nominal,
+              id_santunan: santunan.id_santunan,
+            });
+          });
+
+          await Promise.all(santunanPromises);
+        }
+      });
+
+      await Promise.all(identitasKorbanPromises);
     }
+
     if (identitas_pengemudi && Array.isArray(identitas_pengemudi)) {
-      const identitasPengemudiPromises = identitas_pengemudi.map((pengemudi) =>
-        laporanPengemudiModel.create({
+      const pengemudiPromises = identitas_pengemudi.map((pengemudi) =>
+      laporanPengemudiModel.create({
           id_laporan: id_laporan,
           nama_pengemudi: pengemudi.nama_pengemudi,
           jenis_kelamin_pengemudi: pengemudi.jenis_kelamin_pengemudi,
           umur_pengemudi: pengemudi.umur_pengemudi,
           alamat_pengemudi: pengemudi.alamat_pengemudi,
           no_sim: pengemudi.no_sim,
-          no_STNK: pengemudi.no_STNK
+          no_STNK: pengemudi.no_STNK,
         })
       );
 
-      await Promise.all(identitasPengemudiPromises);
+      await Promise.all(pengemudiPromises);
     }
 
-    res.status(201).json({
-      message: "Laporan berhasil dibuat",
-      id_laporan: id_laporan,
-    });
+    res.status(200).json({ message: "Detail laporan polisi berhasil dibuat." });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 export const getAllLaporanBySearch = async (req, res) => {
   try {
@@ -134,6 +150,11 @@ export const getAllLaporanBySearch = async (req, res) => {
               [Op.like]: `%${search}%`
             }
           },
+          {
+            '$Laporan_Kategori.nama_kategori$': {
+              [Op.like]: `%${search}%`
+            }
+          }
         ]
       }
     });
@@ -180,7 +201,12 @@ export const getAllLaporanBySearch = async (req, res) => {
             '$Kecamatan.nama_kecamatan$': {
               [Op.like]: `%${search}%`
             }
-          },
+          }, 
+          {
+            '$Laporan_Kategori.nama_kategori$': {
+              [Op.like]: `%${search}%`
+            }
+          }
 
         ]
       },
@@ -189,8 +215,35 @@ export const getAllLaporanBySearch = async (req, res) => {
       offset: offset,
       subQuery:false
     });
+    const laporanIds = laporan.map(item => item.id_laporan);
+const identitas_korban = await identitasKorbanModel.findAll({
+  include: [
+    { model: laporanModel },
+    {model: santunanModel},
+    { model: lukaModel },
+    { model: skalaTriaseModel}
+  ],
+  where: {
+    id_laporan: {
+      [Op.in]: laporanIds
+    }
+  },
+  order: [['id_laporan', 'ASC']],
+  subQuery: false
+});
+const identitas_pengemudi = await laporanPengemudiModel.findAll({
+  where: {
+    id_laporan: {
+      [Op.in]: laporanIds
+    }
+  },
+  order: [['id_laporan', 'ASC']],
+  subQuery: false
+});
     res.status(200).json({
        laporan: laporan,
+       identitas_korban: identitas_korban, 
+       identitas_pengemudi: identitas_pengemudi,
        page:page,
        limit:limit,
        totalRows:totalRows,
@@ -250,8 +303,8 @@ export const getAllLaporanToValidate = async (req, res) => {
               [Op.like]: `%${search}%`
             }
           },
-          {
-            id_laporan: {
+                    {
+            '$Laporan_Kategori.nama_kategori$': {
               [Op.like]: `%${search}%`
             }
           }
@@ -303,7 +356,7 @@ export const getAllLaporanToValidate = async (req, res) => {
             }
           },
           {
-            id_laporan: {
+            '$Laporan_Kategori.nama_kategori$': {
               [Op.like]: `%${search}%`
             }
           }
@@ -314,17 +367,44 @@ export const getAllLaporanToValidate = async (req, res) => {
       offset: offset,
       subQuery:false
     });
-    res.status(200).json({
-       laporan: laporan,
-       page:page,
-       limit:limit,
-       totalRows:totalRows,
-       totalPages: totalPages
-       });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+   const laporanIds = laporan.map(item => item.id_laporan);
+   const identitas_korban = await identitasKorbanModel.findAll({
+    include: [
+      { model: laporanModel },
+      { model: santunanModel },
+      { model: lukaModel },
+      { model: skalaTriaseModel}
+    ],
+    where: {
+      id_laporan: {
+        [Op.in]: laporanIds
+      }
+    },
+    order: [['id_laporan', 'ASC']],
+    subQuery: false
+  });
+  const identitas_pengemudi = await laporanPengemudiModel.findAll({
+    where: {
+      id_laporan: {
+        [Op.in]: laporanIds
+      }
+    },
+    order: [['id_laporan', 'ASC']],
+    subQuery: false
+  });
+      res.status(200).json({
+        laporan: laporan,
+        identitas_korban: identitas_korban, 
+        identitas_pengemudi: identitas_pengemudi,
+        page:page,
+        limit:limit,
+        totalRows:totalRows,
+        totalPages: totalPages
+        });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
   }
-}
 
 // export const getLaporanByIdUser = async (req, res) => {
 //   try {
@@ -363,9 +443,23 @@ export const getAllLaporan = async (req, res) => {
   }
 }
 
+export const getIdentitasKorban = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const identitasKorban = await identitasKorbanModel.findAll({
+      where: { id_laporan: id },
+    });
+    res.status(200).json({ identitasKorban: identitasKorban });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+
 export const deleteLaporan = async (req, res) => {
   try {
     const { id } = req.params;
+    const { id_identitas_korban } = req.params;
     const deleted = await laporanModel.destroy({
       where: { id_laporan: id },
     });
@@ -378,6 +472,9 @@ export const deleteLaporan = async (req, res) => {
       });
       const deleteIdentitasPelaku = await laporanPengemudiModel.destroy({
         where: { id_laporan: id },
+      });
+      const deleteIdentitasSantunan = await identitasSantunanModel.destroy({
+        where: { id_identitas_santunan: id_identitas_korban },
       });
       return res.status(200).json({ message: "Laporan berhasil" , Laporan: deleteLaporan});
     }
@@ -438,7 +535,16 @@ export const countLaporan = async (req, res) => {
       subQuery:false
         }
     );
-    res.status(200).json({ count : countValidate, countNotValidate : countNotValidate});
+    const jumlahKorban = await identitasKorbanModel.count(
+      {include : 
+        [{model:laporanModel,include:[usersModel]}],
+        where: {
+          '$Laporan.id_kecamatan$':true,
+      },
+      subQuery:false
+      }
+    );
+    res.status(200).json({ count : countValidate, countNotValidate : countNotValidate, jumlahKorban : jumlahKorban});
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -469,7 +575,6 @@ export const countLaporanByKecamatanUnValidated = async (req, res) => {
       attributes: ['id_kecamatan', [sequelize.fn('COUNT', 'id_kecamatan'), 'count']],
       order: [[sequelize.fn('COUNT', 'id_kecamatan'), 'DESC']],
       group: ['id_kecamatan'],
-      limit : 2,
       include : [kecamatanModel,usersModel],
       where: {
         '$users.Users_Laporan.status$':true,

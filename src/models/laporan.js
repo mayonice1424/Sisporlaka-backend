@@ -53,8 +53,8 @@ const laporanModel =  db.define('laporan', {
     freezeTableName: true
 });
 
-laporanKategoriModel.hasMany( laporanModel, { foreignKey: 'id_laporan_kategori' });
-laporanModel.belongsTo( laporanKategoriModel, { foreignKey: 'id_laporan_kategori' });
+laporanKategoriModel.hasMany( laporanModel, { allowNull:true, foreignKey: 'id_laporan_kategori' });
+laporanModel.belongsTo( laporanKategoriModel, {allowNull:true, foreignKey: 'id_laporan_kategori' });
 
 kecamatanModel.hasMany( laporanModel, { foreignKey: 'id_kecamatan' });
 laporanModel.belongsTo( kecamatanModel, { foreignKey: 'id_kecamatan' });

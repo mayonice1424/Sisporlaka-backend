@@ -1,4 +1,8 @@
 import identitasKorbanModel from "../models/identitasKorbanModel.js";
+import lukaModel from "../models/lukaModel.js";
+import skalaTriaseModel from "../models/skalaTriase.js";
+import icd10Model from "../models/icd-10Model.js";
+
 
 export const createNewIdentitasKorban = async (req, res) => {
   const {nama,jenis_kelamin,umur, alamat, NIK, nama_rumah_sakit,nomor_rekam_medis} = req.body;
@@ -33,7 +37,33 @@ export const createNewIdentitasKorban = async (req, res) => {
 
 export const getAllIdentitasKorban = async (req, res) => {
   try {
-    const identitasKorban = await identitasKorbanModel.findAll();
+    const id_laporan = req.params.id;
+    const identitasKorban = await identitasKorbanModel.findAll({
+      include: [
+        {
+          model: lukaModel,
+          attributes: {
+            exclude: ["createdAt", "updatedAt"],
+          },
+        },
+        {
+          model: skalaTriaseModel,
+          attributes: {
+            exclude: ["createdAt", "updatedAt"],
+          },
+        },
+        {
+          model: icd10Model,
+          attributes: {
+            exclude: ["createdAt", "updatedAt"],
+          },
+        },
+      ],
+      attributes: {
+        exclude: ["createdAt", "updatedAt"],
+      },
+      where: { id_laporan: req.params.id },
+    });
     res.status(200).json({ identitasKorban: identitasKorban });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -43,17 +73,30 @@ export const getAllIdentitasKorban = async (req, res) => {
 export const getIdentitasKorbanById = async (req, res) => {
   try {
     const { id } = req.params;
-    await identitasKorbanModel.findOne({
+    const identitas_korban = await identitasKorbanModel.findOne({
+      include: [
+        {
+          model: lukaModel
+        },
+        {
+          model: skalaTriaseModel
+        },
+        { 
+          model: icd10Model
+        }
+      ],
       where: { id_identitas_korban: id },
-    }).then((response) => {
-      res.status(200).json({ identitasKorban: response });
+    });
+
+    if (identitas_korban) {
+      res.status(200).json({ identitas_korban: identitas_korban });
+    } else {
+      res.status(404).json({ message: "Identitas korban tidak ditemukan" });
     }
-    )
-  }
-  catch (error) {
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
-}
+};
 
 export const deleteIdentitasKorban = async (req, res) => {
   try {

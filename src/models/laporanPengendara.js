@@ -8,9 +8,6 @@ const laporanPengemudiModel = db.define('Laporan_Pengemudi', {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
-    validate: {
-      notEmpty: true
-    }
   },
   nama_pengemudi: {
     type: DataTypes.STRING,

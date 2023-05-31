@@ -2,6 +2,9 @@ import identitasKorbanModel from "../models/identitasKorbanModel.js";
 import lukaModel from "../models/lukaModel.js";
 import skalaTriaseModel from "../models/skalaTriase.js";
 import icd10Model from "../models/icd-10Model.js";
+import laporanModel from "../models/laporan.js";
+import santunanModel from "../models/santunanModels.js";
+import identitasSantunanModel from "../models/identitasSantunanModel.js";
 
 
 export const createNewIdentitasKorban = async (req, res) => {
@@ -37,7 +40,6 @@ export const createNewIdentitasKorban = async (req, res) => {
 
 export const getAllIdentitasKorban = async (req, res) => {
   try {
-    const id_laporan = req.params.id;
     const identitasKorban = await identitasKorbanModel.findAll({
       include: [
         {
@@ -58,12 +60,27 @@ export const getAllIdentitasKorban = async (req, res) => {
             exclude: ["createdAt", "updatedAt"],
           },
         },
+        {
+          model: laporanModel,
+          attributes: {
+            exclude: ["createdAt", "updatedAt"],
+          },
+        },
+        {
+          model: santunanModel,
+          attributes: {
+            exclude: ["createdAt", "updatedAt"],
+        }
+      }
       ],
+      where: { id_laporan: req.params.id },
+      group: ["id_identitas_korban"],
       attributes: {
         exclude: ["createdAt", "updatedAt"],
       },
-      where: { id_laporan: req.params.id },
+      subQuery: false,
     });
+
     res.status(200).json({ identitasKorban: identitasKorban });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -73,7 +90,7 @@ export const getAllIdentitasKorban = async (req, res) => {
 export const getIdentitasKorbanById = async (req, res) => {
   try {
     const { id } = req.params;
-    const identitas_korban = await identitasKorbanModel.findOne({
+    const identitas_korban = await identitasKorbanModel.findAll({
       include: [
         {
           model: lukaModel
@@ -83,16 +100,17 @@ export const getIdentitasKorbanById = async (req, res) => {
         },
         { 
           model: icd10Model
+        },
+        {
+          model : identitasSantunanModel
         }
       ],
-      where: { id_identitas_korban: id },
+      where: { id_laporan : id },
     });
-
     if (identitas_korban) {
-      res.status(200).json({ identitas_korban: identitas_korban });
-    } else {
-      res.status(404).json({ message: "Identitas korban tidak ditemukan" });
+      return res.status(200).json({ identitas_korban: identitas_korban });
     }
+    return res.status(404).send("Identitas Korban with the specified ID does not exists");
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -112,6 +130,11 @@ export const deleteIdentitasKorban = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 }
+
+
+
+
+
 
 export const updateIdentitasKorban = async (req, res) => {
   try {

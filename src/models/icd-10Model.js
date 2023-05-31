@@ -6,9 +6,6 @@ const icd10Model = db.define("ICD-10", {
     kode_icd_10: {
     type: DataTypes.STRING,
     primaryKey: true,
-    validate: {
-      notEmpty: true
-    }
   },
   insiden: {
     type: DataTypes.STRING,

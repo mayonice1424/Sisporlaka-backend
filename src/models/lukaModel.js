@@ -8,18 +8,15 @@ const lukaModel = db.define("wounds", {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
-    validate: {
-      notEmpty: true
-    },
   },
   keterangan_luka: {
     type: DataTypes.STRING,
-
-    validate: {
-      notEmpty: true
-    },
+  },
+}
+  ,{
+    freezeTableName: true
   }
-});
+);
 
 
 export default lukaModel;

@@ -15,3 +15,13 @@ export const createNewSkalaTriase = async (req, res) => {
       res.status(500).json({ error: error.message });  
     }
 }
+
+export const getAllSkalaTriase = async (req, res) => {
+  try {
+    const skalaTriase = await skalaTriaseModel.findAll();
+    res.status(200).json({ skalaTriase: skalaTriase });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+

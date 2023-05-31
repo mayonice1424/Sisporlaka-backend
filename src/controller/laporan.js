@@ -11,6 +11,7 @@ import identitasSantunanModel from "../models/identitasSantunanModel.js";
 import lukaModel from "../models/lukaModel.js";
 import santunanModel from "../models/santunanModels.js";
 import skalaTriaseModel from "../models/skalaTriase.js";
+import icd10Model from "../models/icd-10Model.js";
 export const createNewLaporan = async (req, res) => {
   const { judul_kejadian, tanggal, waktu, lokasi, kerugian_materil, penyebab, keterangan,id_kecamatan } = req.body;
   const {id_users,status} = req.body;
@@ -52,13 +53,14 @@ export const createDetailLaporanPolisi = async (req, res) => {
           id_laporan: id_laporan,
           nama: korban.nama,
           jenis_kelamin: korban.jenis_kelamin,
-          umur: parseInt(korban.umur), // Mengubah umur menjadi angka dengan parseInt
+          umur: parseInt(korban.umur), 
+          kode_icd_10: korban.kode_icd_10,
           alamat: korban.alamat,
           plat_ambulance: korban.plat_ambulance,
           NIK: korban.NIK,
           nama_rumah_sakit: korban.nama_rumah_sakit,
           nomor_rekam_medis: korban.nomor_rekam_medis,
-          id_luka: parseInt(korban.id_luka), // Mengubah id_luka menjadi angka dengan parseInt
+          id_luka: parseInt(korban.id_luka), 
           kode_ATS: korban.kode_ATS,
         });
 
@@ -94,7 +96,230 @@ export const createDetailLaporanPolisi = async (req, res) => {
       await Promise.all(pengemudiPromises);
     }
 
-    res.status(200).json({ message: "Detail laporan polisi berhasil dibuat." });
+    res.status(201).json({ message: "Detail laporan polisi berhasil dibuat.",
+  });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const createKorban = async (req, res) => {
+  const { id_laporan,nama, jenis_kelamin,umur, kode_icd_10, alamat,plat_ambulance,NIK,nama_rumah_sakit,id_luka,nomor_rekam_medis,kode_ATS } = req.body;
+  try {
+   const createdIdentitasKorban = await identitasKorbanModel.create({
+      id_laporan: id_laporan,
+      nama: nama,
+      jenis_kelamin: jenis_kelamin,
+      umur: parseInt(umur),
+      kode_icd_10: kode_icd_10,
+      alamat: alamat,
+      plat_ambulance: plat_ambulance,
+      NIK: NIK,
+      nama_rumah_sakit: nama_rumah_sakit,
+      nomor_rekam_medis: nomor_rekam_medis,
+      id_luka: id_luka,
+      kode_ATS: kode_ATS,
+    }).then((response) => {
+      res.status(201).json({
+        message: "Korban berhasil dibuat",
+        id_identitas_korban: response.id_identitas_korban,
+      });
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const createNewIdentitasSantunan = async (req, res) => {
+  try {
+    const {id_identitas_korban, id_santunan, nominal} = req.body;
+    await identitasSantunanModel.create({
+      id_identitas_korban: id_identitas_korban,
+      id_santunan: id_santunan,
+      nominal: nominal
+    }).then((response) => {
+      res.status(201).json({
+        message: "Identitas Santunan berhasil dibuat",
+        id_identitas_santunan: response.id_identitas_santunan
+      });
+    })
+  }
+  catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export const getIdentitasSantunan = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const identitasSantunan = await identitasKorbanModel.findAll({
+      include : [
+        {
+          model: santunanModel,
+        },
+        {
+          model: lukaModel,
+        },
+        {
+          model: laporanModel,
+        },
+        {
+          model: icd10Model
+        },
+        {
+          model: skalaTriaseModel
+        }
+
+
+      ],
+      where: {
+        id_laporan: id,
+      },
+      subQuery: false,
+    }).then((response) => {
+      res.status(200).json({ identitasSantunan: response });
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const deleteIdentitasSantunan = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await identitasSantunanModel.destroy({
+      where: {
+        id_identitas_santunan: id,
+      },
+    });
+    if (deleted) {
+      return res.status(200).send("Identitas Santunan deleted");
+    }
+    throw new Error("Identitas Santunan not found");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+
+export const deleteKorban = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await identitasKorbanModel.destroy({
+      where: {
+        id_identitas_korban: id,
+      },
+    });
+    if (deleted) {
+      return res.status(200).send("Identitas korban deleted");
+    }
+    throw new Error("Identitas korban not found");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+
+
+
+
+
+
+
+
+export const updateDetailLaporanPolisi = async (req, res) => {
+  const { identitas_korban, identitas_pengemudi, id_laporan } = req.body;
+
+  try {
+    if (identitas_korban && Array.isArray(identitas_korban)) {
+      const identitasKorbanPromises = identitas_korban.map(async (korban) => {
+        await identitasKorbanModel.update(
+          {
+            nama: korban.nama,
+            jenis_kelamin: korban.jenis_kelamin,
+            umur: parseInt(korban.umur), 
+            kode_icd_10: korban.kode_icd_10,
+            alamat: korban.alamat,
+            plat_ambulance: korban.plat_ambulance,
+            NIK: korban.NIK,
+            nama_rumah_sakit: korban.nama_rumah_sakit,
+            nomor_rekam_medis: korban.nomor_rekam_medis,
+            id_luka: parseInt(korban.id_luka), 
+            kode_ATS: korban.kode_ATS,
+          },
+          {
+            where: {
+              id_laporan: id_laporan,
+              id_identitas_korban: korban.id_identitas_korban,
+            },
+          }
+        );
+
+        if (korban.identitas_santunan && Array.isArray(korban.identitas_santunan)) {
+          const santunanPromises = korban.identitas_santunan.map((santunan) => {
+            if (santunan.id_identitas_santunan) {
+              return identitasSantunanModel.update(
+                {
+                  nominal: santunan.nominal,
+                  id_santunan: santunan.id_santunan,
+                },
+                {
+                  where: {
+                    id_identitas_santunan: santunan.id_identitas_santunan,
+                  },
+                }
+              );
+            } else {
+              return identitasSantunanModel.create({
+                id_identitas_korban: korban.id_identitas_korban,
+                nominal: santunan.nominal,
+                id_santunan: santunan.id_santunan,
+              });
+            }
+          });
+
+          await Promise.all(santunanPromises);
+        }
+      });
+
+      await Promise.all(identitasKorbanPromises);
+    }
+
+    if (identitas_pengemudi && Array.isArray(identitas_pengemudi)) {
+      const pengemudiPromises = identitas_pengemudi.map((pengemudi) => {
+        if (pengemudi.id_laporan_pengemudi) {
+          return laporanPengemudiModel.update(
+            {
+              nama_pengemudi: pengemudi.nama_pengemudi,
+              jenis_kelamin_pengemudi: pengemudi.jenis_kelamin_pengemudi,
+              umur_pengemudi: pengemudi.umur_pengemudi,
+              alamat_pengemudi: pengemudi.alamat_pengemudi,
+              no_sim: pengemudi.no_sim,
+              no_STNK: pengemudi.no_STNK,
+            },
+            {
+              where: {
+                id_laporan_pengemudi: pengemudi.id_laporan_pengemudi,
+              },
+            }
+          );
+        } else {
+          return laporanPengemudiModel.create({
+            id_laporan: id_laporan,
+            nama_pengemudi: pengemudi.nama_pengemudi,
+            jenis_kelamin_pengemudi: pengemudi.jenis_kelamin_pengemudi,
+            umur_pengemudi: pengemudi.umur_pengemudi,
+            alamat_pengemudi: pengemudi.alamat_pengemudi,
+            no_sim: pengemudi.no_sim,
+            no_STNK: pengemudi.no_STNK,
+          });
+        }
+      });
+
+      await Promise.all(pengemudiPromises);
+    }
+
+    res.status(200).json({ message: "Detail laporan polisi berhasil diperbarui." });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -219,8 +444,9 @@ export const getAllLaporanBySearch = async (req, res) => {
 const identitas_korban = await identitasKorbanModel.findAll({
   include: [
     { model: laporanModel },
-    {model: santunanModel},
+    { model: santunanModel},
     { model: lukaModel },
+    { model: icd10Model},
     { model: skalaTriaseModel}
   ],
   where: {
@@ -373,6 +599,7 @@ export const getAllLaporanToValidate = async (req, res) => {
       { model: laporanModel },
       { model: santunanModel },
       { model: lukaModel },
+      { model: icd10Model},
       { model: skalaTriaseModel}
     ],
     where: {
@@ -539,7 +766,7 @@ export const countLaporan = async (req, res) => {
       {include : 
         [{model:laporanModel,include:[usersModel]}],
         where: {
-          '$Laporan.id_kecamatan$':true,
+          '$Laporan.users.Users_Laporan.status$':true,
       },
       subQuery:false
       }
@@ -549,6 +776,25 @@ export const countLaporan = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 }
+
+export const countGrafik = async (req, res) => {
+  try {
+    const count = await laporanModel.findAll({
+      attributes: ['id_kecamatan', [sequelize.fn('COUNT', 'id_kecamatan'), 'count']],
+      order: [[sequelize.fn('COUNT', 'id_kecamatan'), 'DESC']],
+      group: ['id_kecamatan'],
+      include : [{model:kecamatanModel},{model:usersModel , attributes : { exclude : ["password","refresh_token"]}}],
+      where: {
+        '$users.Users_Laporan.status$':true,
+    },
+    subQuery:false
+  });
+    res.status(200).json({ count : count});
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 
 export const countLaporanByKecamatanValidated = async (req, res) => {
   try {

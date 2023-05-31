@@ -6,9 +6,6 @@ const skalaTriaseModel = db.define('Skala_Triase', {
   kode_ATS: {
     type: DataTypes.STRING,
     primaryKey: true,
-    validate: {
-      notEmpty: true
-    }
   },
   keterangan: {
     type: DataTypes.STRING,

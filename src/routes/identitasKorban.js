@@ -4,7 +4,7 @@ const router = express.Router();
 
 router.post("/identitaskorban", createNewIdentitasKorban);
 router.get("/identitaskorban/:id", getIdentitasKorbanById);
-// router.get("/identitaskorban/:id", getIdentitasKorbanById);
+router.get("/identitas/:id", getAllIdentitasKorban);
 router.delete("/identitaskorban/:id", deleteIdentitasKorban);
 router.patch("/identitaskorban/:id", updateIdentitasKorban);
 

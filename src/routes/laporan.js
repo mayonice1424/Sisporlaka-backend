@@ -1,4 +1,4 @@
-import {createNewLaporan,deleteLaporan,createDetailLaporanPolisi,getAllLaporanBySearch,updateLaporan,  getLaporanById, countLaporan,getAllLaporanToValidate,updateStatusLaporan, countLaporanByKecamatanValidated,countLaporanByKecamatanUnValidated, getAllLaporan } from "../controller/laporan.js";
+import {createNewLaporan,deleteLaporan,getIdentitasSantunan,deleteIdentitasSantunan,createNewIdentitasSantunan,deleteKorban,countGrafik,createDetailLaporanPolisi,getAllLaporanBySearch,updateLaporan,  getLaporanById, countLaporan,getAllLaporanToValidate,updateStatusLaporan, countLaporanByKecamatanValidated,countLaporanByKecamatanUnValidated, getAllLaporan, createKorban } from "../controller/laporan.js";
 import express from 'express';
 const router = express.Router();
 
@@ -8,10 +8,17 @@ router.delete("/laporan/:id", deleteLaporan);
 router.get("/laporan", getAllLaporanBySearch);
 router.get('/laporanall', getAllLaporan);
 router.put('/laporan/:id', updateLaporan);
+router.post('/korban', createKorban);
+router.delete('/korban/:id', deleteKorban);
+router.post('/laporandetail', createDetailLaporanPolisi);
+router.post('/identitassantunan', createNewIdentitasSantunan);
+router.delete('/identitassantunan/:id', deleteIdentitasSantunan);
 router.get("/laporan/:id", getLaporanById);
 router.get('/laporanvalidate', getAllLaporanToValidate);
 router.get('/count', countLaporan );
 router.patch('/laporanstatus/:id', updateStatusLaporan);
 router.get('/countkecamatan', countLaporanByKecamatanValidated);
 router.get('/countkecamatanunvalidated', countLaporanByKecamatanUnValidated);
+router.get('/countgrafik', countGrafik);
+router.get('/santunankorban/:id', getIdentitasSantunan);
 export default router;

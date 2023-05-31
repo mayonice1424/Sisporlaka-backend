@@ -7,16 +7,9 @@ const santunanModel = db.define("santunan", {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
-    validate: {
-      notEmpty: true
-    }
   },
   jenis_santunan: {
     type: DataTypes.STRING,
-    allowNull: true,
-    validate: {
-      notEmpty: true
-    }
   }
 }, {
   freezeTableName: true

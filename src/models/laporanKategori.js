@@ -6,17 +6,11 @@ const laporanKategoriModel = db.define('Laporan_Kategori', {
   id_laporan_kategori: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
-    primaryKey: true,
-    validate: {
-      notEmpty: true
-    }
+    primaryKey: true
   },
   nama_kategori: {
     type: DataTypes.STRING,
     allowNull: true,
-    validate: {
-      notEmpty: true
-    }
   }
 }
 , {

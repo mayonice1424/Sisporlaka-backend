@@ -11,6 +11,8 @@ const lukaModel = db.define("wounds", {
   },
   keterangan_luka: {
     type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null,
   },
 }
   ,{

@@ -16,24 +16,36 @@ const identitasKorbanModel = db.define('Identitas_Korban', {
   },
   jenis_kelamin: {
     type: DataTypes.STRING,
+    defaultValue: null
   },
   umur: {
     type: DataTypes.INTEGER,
+    defaultValue: null
   },
   alamat: {
     type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null
   },
   plat_ambulance: {
     type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null
     },
   NIK: {
     type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null
   },
   nama_rumah_sakit: {
     type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null
   },
   nomor_rekam_medis: {
     type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null
   }
 }, {
   freezeTableName: true

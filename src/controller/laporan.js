@@ -12,6 +12,7 @@ import lukaModel from "../models/lukaModel.js";
 import santunanModel from "../models/santunanModels.js";
 import skalaTriaseModel from "../models/skalaTriase.js";
 import icd10Model from "../models/icd-10Model.js";
+import { response } from "express";
 export const createNewLaporan = async (req, res) => {
   const { judul_kejadian, tanggal, waktu, lokasi, kerugian_materil, penyebab, keterangan,id_kecamatan } = req.body;
   const {id_users,status} = req.body;
@@ -169,8 +170,6 @@ export const getIdentitasSantunan = async (req, res) => {
         {
           model: skalaTriaseModel
         }
-
-
       ],
       where: {
         id_laporan: id,
@@ -183,6 +182,22 @@ export const getIdentitasSantunan = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const getIdentitasPengemudi = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const identitasPengemudi = await laporanPengemudiModel.findAll({
+      where: {
+        id_laporan: id,
+      },
+    }).then((response) => {
+      res.status(200).json({ identitasPengemudi: response });
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
 export const deleteIdentitasSantunan = async (req, res) => {
   try {
@@ -219,111 +234,76 @@ export const deleteKorban = async (req, res) => {
   }
 }
 
-
-
-
-
-
-
-
-
-export const updateDetailLaporanPolisi = async (req, res) => {
-  const { identitas_korban, identitas_pengemudi, id_laporan } = req.body;
-
+export const updateLaporanPengemudi = async (req, res) => {
   try {
-    if (identitas_korban && Array.isArray(identitas_korban)) {
-      const identitasKorbanPromises = identitas_korban.map(async (korban) => {
-        await identitasKorbanModel.update(
+    const { id } = req.params;
+    const [updated] = await laporanPengemudiModel.update(req.body, {
+      where: { id_laporan_pengemudi: id },
+    });
+    if (updated) {
+      const updatedLaporanPengemudi = await laporanPengemudiModel.findOne({
+        where: { id_laporan_pengemudi: id },
+      });
+      return res.status(200).json({ laporanPengemudi: updatedLaporanPengemudi });
+    }
+    throw new Error("Laporan Pengemudi not found");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export const deleteLaporanPengemudi = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await laporanPengemudiModel.destroy({
+      where: {
+        id_laporan_pengemudi: id,
+      },
+    });
+    if (deleted) {
+      return res.status(200).send("Laporan Pengemudi deleted");
+    }
+    throw new Error("Laporan Pengemudi not found");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export const getLaporanByBulan = async (req, res) => {
+  try {
+    const { bulan } = req.body;
+    const search = req.query.search || '';
+    const laporan = await laporanModel.findAll({
+      include : [kecamatanModel,usersModel],
+      attributes: [
+        [
+          sequelize.literal("CONCAT(EXTRACT(YEAR FROM tanggal), '-', EXTRACT(MONTH FROM tanggal))"),
+          'data'
+        ],
+          'id_kecamatan', [sequelize.fn('COUNT', 'id_kecamatan'), 'count'],
+          'tanggal',
+      ],
+      group: ['data','id_kecamatan'],
+      order: sequelize.literal('data DESC'),
+      where: {
+        '$users.Users_Laporan.status$':true,
+        [Op.and]: [
           {
-            nama: korban.nama,
-            jenis_kelamin: korban.jenis_kelamin,
-            umur: parseInt(korban.umur), 
-            kode_icd_10: korban.kode_icd_10,
-            alamat: korban.alamat,
-            plat_ambulance: korban.plat_ambulance,
-            NIK: korban.NIK,
-            nama_rumah_sakit: korban.nama_rumah_sakit,
-            nomor_rekam_medis: korban.nomor_rekam_medis,
-            id_luka: parseInt(korban.id_luka), 
-            kode_ATS: korban.kode_ATS,
+            tanggal: {
+              [Op.between]:  [`%${search}-01$%`, `%${search}-31$%`],
+            },
           },
-          {
-            where: {
-              id_laporan: id_laporan,
-              id_identitas_korban: korban.id_identitas_korban,
-            },
-          }
-        );
-
-        if (korban.identitas_santunan && Array.isArray(korban.identitas_santunan)) {
-          const santunanPromises = korban.identitas_santunan.map((santunan) => {
-            if (santunan.id_identitas_santunan) {
-              return identitasSantunanModel.update(
-                {
-                  nominal: santunan.nominal,
-                  id_santunan: santunan.id_santunan,
-                },
-                {
-                  where: {
-                    id_identitas_santunan: santunan.id_identitas_santunan,
-                  },
-                }
-              );
-            } else {
-              return identitasSantunanModel.create({
-                id_identitas_korban: korban.id_identitas_korban,
-                nominal: santunan.nominal,
-                id_santunan: santunan.id_santunan,
-              });
-            }
-          });
-
-          await Promise.all(santunanPromises);
-        }
-      });
-
-      await Promise.all(identitasKorbanPromises);
-    }
-
-    if (identitas_pengemudi && Array.isArray(identitas_pengemudi)) {
-      const pengemudiPromises = identitas_pengemudi.map((pengemudi) => {
-        if (pengemudi.id_laporan_pengemudi) {
-          return laporanPengemudiModel.update(
-            {
-              nama_pengemudi: pengemudi.nama_pengemudi,
-              jenis_kelamin_pengemudi: pengemudi.jenis_kelamin_pengemudi,
-              umur_pengemudi: pengemudi.umur_pengemudi,
-              alamat_pengemudi: pengemudi.alamat_pengemudi,
-              no_sim: pengemudi.no_sim,
-              no_STNK: pengemudi.no_STNK,
-            },
-            {
-              where: {
-                id_laporan_pengemudi: pengemudi.id_laporan_pengemudi,
-              },
-            }
-          );
-        } else {
-          return laporanPengemudiModel.create({
-            id_laporan: id_laporan,
-            nama_pengemudi: pengemudi.nama_pengemudi,
-            jenis_kelamin_pengemudi: pengemudi.jenis_kelamin_pengemudi,
-            umur_pengemudi: pengemudi.umur_pengemudi,
-            alamat_pengemudi: pengemudi.alamat_pengemudi,
-            no_sim: pengemudi.no_sim,
-            no_STNK: pengemudi.no_STNK,
-          });
-        }
-      });
-
-      await Promise.all(pengemudiPromises);
-    }
-
-    res.status(200).json({ message: "Detail laporan polisi berhasil diperbarui." });
+        ],
+    },
+    subQuery:false
+  }).then((response) => {
+    res.status(200).json({ laporan: response, search: search });
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 
 export const getAllLaporanBySearch = async (req, res) => {
@@ -431,8 +411,7 @@ export const getAllLaporanBySearch = async (req, res) => {
             '$Laporan_Kategori.nama_kategori$': {
               [Op.like]: `%${search}%`
             }
-          }
-
+          },
         ]
       },
       order: [['tanggal', 'DESC']],
@@ -441,7 +420,7 @@ export const getAllLaporanBySearch = async (req, res) => {
       subQuery:false
     });
     const laporanIds = laporan.map(item => item.id_laporan);
-const identitas_korban = await identitasKorbanModel.findAll({
+    const identitas_korban = await identitasKorbanModel.findAll({
   include: [
     { model: laporanModel },
     { model: santunanModel},
@@ -633,43 +612,6 @@ export const getAllLaporanToValidate = async (req, res) => {
     }
   }
 
-// export const getLaporanByIdUser = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const laporan = await usersLaporanModel.findAll({
-//       order: [['id_users_laporan', 'DESC']],
-//       where: {
-//         status:false,
-//       },
-//       attributes:['id_users_laporan'],
-//       subQuery:false
-//     });
-//     res.status(200).json({ Users_Laporan : laporan });
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// }
-
-
-export const getAllLaporan = async (req, res) => {
-  try {
-    const laporan = await laporanModel.findAll({
-      include: [
-        {model:kecamatanModel},
-        {model:laporanKategoriModel},
-        {model:usersModel,attributes: { exclude: ["password", "refresh_token"]}}],
-      order: [['id_laporan', 'DESC']],
-      where: {
-        '$Kecamatan.nama_kecamatan$': 'Bumi Waras',
-      }, 
-      limit: 2
-    });
-    res.status(200).json({ laporan: laporan });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}
-
 export const getIdentitasKorban = async (req, res) => {
   try {
     const { id } = req.params;
@@ -681,6 +623,27 @@ export const getIdentitasKorban = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 }
+
+
+export const getJumlahKorbanTiapLaporan = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const jumlahKorban = await identitasKorbanModel.findAll({
+      where: {
+        'id_laporan': id, 
+      },
+      attributes: [
+        [sequelize.fn("COUNT", sequelize.col("id_identitas_korban")), "jumlah_korban"]
+      ],
+      // group: ["id_laporan"],
+    });
+
+    res.status(200).json({ jumlahKorban: jumlahKorban });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
 
 export const deleteLaporan = async (req, res) => {
@@ -701,7 +664,7 @@ export const deleteLaporan = async (req, res) => {
         where: { id_laporan: id },
       });
       const deleteIdentitasSantunan = await identitasSantunanModel.destroy({
-        where: { id_identitas_santunan: id_identitas_korban },
+        where: { id_identitas_santunan: response.id_identitas_korban },
       });
       return res.status(200).json({ message: "Laporan berhasil" , Laporan: deleteLaporan});
     }
@@ -936,29 +899,71 @@ export const getUsersLaporan = async (req, res) => {
 }
 
 export const updateLaporan = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const [updated] = await laporanModel.update(req.body, {
-      where: { id_laporan: id },
+try {
+  const { id } = req.params;
+  const [updated] = await laporanModel.update(req.body, {
+  where: { id_laporan: id }
+});
+if (updated) {
+  const updatedLaporan = await usersLaporanModel.update(
+    { status : false},
+    { where: { id_laporan: id } });
+  return res.status(200).json({ laporan: updatedLaporan });
+}
+throw new Error('Laporan not found');
+} catch (error) {
+return res.status(500).send(error.message);
+}
+};
+
+  export const updateLaporanKorban = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const [updated] = await identitasKorbanModel.update(req.body, {
+      where: { id_identitas_korban: id }
     });
     if (updated) {
-      const updatedLaporan = await usersLaporanModel.update(
-        { status: false },
-        { where: { id_laporan: id } }
-      );
-      const updateIdentitasKorban = await identitasKorbanModel.update(req.body, {
-        where: { id_laporan: id },
-      });
-      const updateIdentitasPengemudi = await laporanPengemudiModel.update(req.body, {
-        where: { id_laporan: id },
-      });
-      return res.status(200).json({ laporan: updated });
+      const updatedLaporanKorban = await identitasKorbanModel.findOne({ where: { id_identitas_korban: id } });
+      return res.status(200).json({ identitasKorban: updatedLaporanKorban });
     }
-    throw new Error("Laporan not found");
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}
+    throw new Error('Laporan Korban not found');
+    } catch (error)
+    {
+      return res.status(500).send(error.message);
+    }
+    };
+
+    export const updatePengendara = async (req, res) => {
+      try {
+        const { id } = req.params;
+        const [updated] = await laporanPengemudiModel.update(req.body, {
+        where: { id_laporan_pengendara: id }
+      });
+      if (updated) {
+        const updatedLaporanPengendara = await laporanPengemudiModel.findOne({ where: { id_laporan_pengendara: id } });
+        return res.status(200).json({ laporanPengendara: updatedLaporanPengendara });
+      }
+      throw new Error('Laporan Pengendara not found');
+      } catch (error)
+      {
+        return res.status(500).send(error.message);
+      }
+      };
+
+      export const updateIdentitasSantunan = async (req, res) => {
+       const { id } = req.params;
+        const update = await identitasSantunanModel.update(req.body, {
+        where: { id_identitas_santunan: id }
+      });
+      if (update) {
+        return res.status(200).json({ message: 'Identitas Santunan berhasil diubah' });
+      }
+    };
+          
+
+
+
+
 
 // const { judul_kejadian, tanggal, waktu, lokasi, kerugian_materil, plat_ambulance, penyebab, keterangan,id_kecamatan } = req.body;
 //   const {id_users,status} = req.body;

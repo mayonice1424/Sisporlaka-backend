@@ -59,22 +59,6 @@ export const deleteLaporanPengemudi = async (req, res) => {
   }
 }
 
-export const updateLaporanPengemudi = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const [updated] = await laporanPengemudiModel.update(req.body, {
-      where: { id_laporan_pengemudi: id },
-    });
-    if (updated) {
-      const updatedLaporanPengemudi = await laporanPengemudiModel.findOne({
-        where: { id_laporan_pengemudi: id },
-      });
-      return res.status(200).json({ laporanPengemudi: updatedLaporanPengemudi });
-    }
-    throw new Error("Laporan Pengemudi not found");
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}
+
 
 

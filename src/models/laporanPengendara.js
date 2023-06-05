@@ -11,21 +11,36 @@ const laporanPengemudiModel = db.define('Laporan_Pengemudi', {
   },
   nama_pengemudi: {
     type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null
   },
   jenis_kelamin_pengemudi: {
     type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null
   },
   umur_pengemudi: {
     type: DataTypes.INTEGER,
+    
+    allowNull: true,
+    defaultValue: null
   },
   alamat_pengemudi: {
     type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null
+
   },
   no_sim: {
     type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: null
+
   },
   no_STNK: {
     type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: null
 }
 }
 , {

@@ -42,12 +42,18 @@ const laporanModel =  db.define('laporan', {
     },
     kerugian_materil:{
       type: DataTypes.INTEGER.UNSIGNED,
+        allowNull: true,
+        defaultValue: 0,
     },
     penyebab:{
         type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null
     },
     keterangan:{
         type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null
     },
 },{
     freezeTableName: true

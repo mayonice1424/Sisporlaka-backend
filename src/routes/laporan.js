@@ -1,4 +1,4 @@
-import {createNewLaporan,deleteLaporan,getJumlahKorbanTiapLaporan,deleteLaporanPengemudi,getLaporanByBulan,updateLaporanPengemudi,getIdentitasPengemudi,getIdentitasSantunan,deleteIdentitasSantunan,createNewIdentitasSantunan,deleteKorban,countGrafik,createDetailLaporanPolisi,getAllLaporanBySearch,updateLaporan,  getLaporanById, countLaporan,getAllLaporanToValidate,updateStatusLaporan, countLaporanByKecamatanValidated,countLaporanByKecamatanUnValidated, createKorban, updateLaporanKorban,updateIdentitasSantunan } from "../controller/laporan.js";
+import {createNewLaporan,deleteLaporan,getJumlahKorbanTiapLaporan,deleteLaporanPengemudi,getLaporanByBulan,updateLaporanPengemudi,getIdentitasPengemudi,getIdentitasSantunan,deleteIdentitasSantunan,createNewIdentitasSantunan,deleteKorban,countGrafik,createDetailLaporanPolisi,getAllLaporanBySearch,updateLaporan,  getLaporanById, countLaporan,getAllLaporanToValidate,updateStatusLaporan, countLaporanByKecamatanValidated,countLaporanByKecamatanUnValidated, createKorban, updateLaporanKorban,updateIdentitasSantunan,getAllLaporanToDownload } from "../controller/laporan.js";
 import express from 'express';
 const router = express.Router();
 
@@ -27,6 +27,7 @@ router.patch('/pengemudi/:id',updateLaporanPengemudi);
 router.delete('/pengemudi/:id',deleteLaporanPengemudi);
 router.get('/grafik/:id', getLaporanByBulan);
 router.get('/jumlahKorban/:id', getJumlahKorbanTiapLaporan);
+router.get('/download', getAllLaporanToDownload) 
 
 
 // router.patch

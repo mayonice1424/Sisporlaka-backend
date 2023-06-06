@@ -327,7 +327,7 @@ export const getAllLaporanBySearch = async (req, res) => {
           },
           {
             tanggal: {
-              [Op.like]: `%${search}%`
+              [Op.between]:  [`%${search}-01$%`, `%${search}-31$%`],
             }
           },
           {
@@ -379,7 +379,7 @@ export const getAllLaporanBySearch = async (req, res) => {
           },
           {
             tanggal: {
-              [Op.like]: `%${search}%`
+              [Op.between]:  [`%${search}-01$%`, `%${search}-31$%`],
             }
           },
           {
@@ -459,6 +459,122 @@ const identitas_pengemudi = await laporanPengemudiModel.findAll({
   }
 }
 
+export const getAllLaporanToDownload= async (req, res) => {
+  try {
+    const search = req.query.search_query || '';
+    const totalRows = await laporanModel.count({
+      include: [
+        {model:kecamatanModel},
+        {model:laporanKategoriModel},
+        {model:usersModel,attributes: { exclude: ["password", "refresh_token"]}}],
+      where: {
+        '$users.Users_Laporan.status$':true,
+        [Op.or]: [
+          {
+            judul_kejadian: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            tanggal: {
+              [Op.between]:  [`%${search}-01$%`, `%${search}-31$%`],
+            }
+          },
+          {
+            waktu: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            lokasi: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            penyebab: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            keterangan: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            '$Kecamatan.nama_kecamatan$': {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            '$Laporan_Kategori.nama_kategori$': {
+              [Op.like]: `%${search}%`
+            }
+          }
+        ]
+      }
+    });
+    const laporan = await laporanModel.findAll({
+      include: [
+        {model:kecamatanModel},
+        {model:laporanKategoriModel},
+        {model:usersModel,attributes: { exclude: ["password", "refresh_token"]}}],
+      where: {          
+        '$users.Users_Laporan.status$':true,
+        [Op.or]: [
+          {
+            judul_kejadian: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            tanggal: {
+              [Op.between]:  [`%${search}-01$%`, `%${search}-31$%`],
+            }
+          },
+          {
+            waktu: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            lokasi: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            penyebab: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            keterangan: {
+              [Op.like]: `%${search}%`
+            }
+          },
+          {
+            '$Kecamatan.nama_kecamatan$': {
+              [Op.like]: `%${search}%`
+            }
+          }, 
+          {
+            '$Laporan_Kategori.nama_kategori$': {
+              [Op.like]: `%${search}%`
+            }
+          },
+        ]
+      },
+      order: [['tanggal', 'DESC']],
+      subQuery:false
+    });
+    res.status(200).json({
+       laporan: laporan,
+       totalRows:totalRows,
+       });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 export const getAllLaporanToValidate = async (req, res) => {
   try {
     const page = parseInt(req.query.page)|| 0;
@@ -480,7 +596,7 @@ export const getAllLaporanToValidate = async (req, res) => {
           },
           {
             tanggal: {
-              [Op.like]: `%${search}%`
+              [Op.between]:  [`%${search}-01$%`, `%${search}-31$%`],
             }
           },
           {
@@ -532,7 +648,7 @@ export const getAllLaporanToValidate = async (req, res) => {
           },
           {
             tanggal: {
-              [Op.like]: `%${search}%`
+              [Op.between]:  [`%${search}-01$%`, `%${search}-31$%`],
             }
           },
           {
@@ -1013,3 +1129,4 @@ return res.status(500).send(error.message);
 //     res.status(500).json({ error: error.message });  
 //   }
 // }
+

@@ -204,7 +204,7 @@ export const deleteIdentitasSantunan = async (req, res) => {
     const { id } = req.params;
     const deleted = await identitasSantunanModel.destroy({
       where: {
-        id_identitas_santunan: id,
+        id_identitas_korban: id,
       },
     });
     if (deleted) {
@@ -271,7 +271,6 @@ export const deleteLaporanPengemudi = async (req, res) => {
 
 export const getLaporanByBulan = async (req, res) => {
   try {
-    const { bulan } = req.body;
     const search = req.query.search || '';
     const laporan = await laporanModel.findAll({
       include : [kecamatanModel,usersModel],
@@ -304,6 +303,31 @@ export const getLaporanByBulan = async (req, res) => {
   }
 };
 
+export const getLaporanByTahunBulan = async (req, res) => {
+    try {
+      const laporan = await laporanModel.findAll({
+        include : [
+         {model:usersModel, attributes:{ exclude:['password','id_users','role','username','refresh_token','createdAt']} },
+        ],
+        attributes: [
+          [
+            sequelize.literal("CONCAT(EXTRACT(YEAR FROM tanggal), '-', EXTRACT(MONTH FROM tanggal))"),
+            'data'
+          ],
+        ],
+        group: ['data'],
+        order: sequelize.literal('data DESC'),
+        where: {
+          '$users.Users_Laporan.status$':true,
+      },
+      subQuery:false
+    }).then((response) => {
+      res.status(200).json({ laporan: response });
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
 
 
 export const getAllLaporanBySearch = async (req, res) => {
@@ -765,7 +789,6 @@ export const getJumlahKorbanTiapLaporan = async (req, res) => {
 export const deleteLaporan = async (req, res) => {
   try {
     const { id } = req.params;
-    const { id_identitas_korban } = req.params;
     const deleted = await laporanModel.destroy({
       where: { id_laporan: id },
     });
@@ -778,17 +801,16 @@ export const deleteLaporan = async (req, res) => {
       });
       const deleteIdentitasPelaku = await laporanPengemudiModel.destroy({
         where: { id_laporan: id },
+      }).then((result) => {
+        res.status(200).json({ message: "Laporan berhasil dihapus" });
       });
-      const deleteIdentitasSantunan = await identitasSantunanModel.destroy({
-        where: { id_identitas_santunan: response.id_identitas_korban },
-      });
-      return res.status(200).json({ message: "Laporan berhasil" , Laporan: deleteLaporan});
     }
     throw new Error("Laporan not found");
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
+
 
 export const updateStatusLaporan = async (req, res) => {
   try {

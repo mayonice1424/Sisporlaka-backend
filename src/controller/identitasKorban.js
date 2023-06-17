@@ -131,11 +131,6 @@ export const deleteIdentitasKorban = async (req, res) => {
   }
 }
 
-
-
-
-
-
 export const updateIdentitasKorban = async (req, res) => {
   try {
     const { id } = req.params;

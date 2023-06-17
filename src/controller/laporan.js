@@ -329,6 +329,34 @@ export const getLaporanByTahunBulan = async (req, res) => {
     }
   };
 
+  export const getLaporanByTahunBulanforPublic = async (req, res) => {
+    try {
+      const limit = 5;
+      const laporan = await laporanModel.findAll({
+        include : [
+         {model:usersModel, attributes:{ exclude:['password','id_users','role','username','refresh_token','createdAt']} },
+        ],
+        attributes: [
+          [
+            sequelize.literal("CONCAT(EXTRACT(YEAR FROM tanggal), '-', EXTRACT(MONTH FROM tanggal))"),
+            'data'
+          ],
+        ],
+        group: ['data'],
+        order: sequelize.literal('data DESC'),
+        where: {
+          '$users.Users_Laporan.status$':true,
+      },
+      limit:limit,
+      subQuery:false
+    }).then((response) => {
+      res.status(200).json({ laporan: response });
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+
 
 export const getAllLaporanBySearch = async (req, res) => {
   try {

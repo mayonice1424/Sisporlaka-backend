@@ -357,6 +357,59 @@ export const getLaporanByTahunBulan = async (req, res) => {
     }
   };
 
+export const getLaporanByDate = async (req, res) => {
+  try {
+    try {
+      const page = parseInt(req.query.page)|| 0;
+      const limit = parseInt(req.query.limit) || 10;
+      const {id} = req.params;
+      const offset = limit * page;
+      const totalRows = await laporanModel.count({
+        include: [
+          {model:kecamatanModel},
+          {model:laporanKategoriModel},
+          {model:usersModel,attributes: { exclude: ["password", "refresh_token"]}}],
+        where: {
+          '$users.Users_Laporan.status$':true,
+          [Op.or]: [
+            {
+              tanggal: {
+                [Op.between]:  [`%${id}-01$%`, `%${id}-31$%`],
+              }
+            },
+        ],
+      }});
+      const totalPages = Math.ceil(totalRows / limit);
+      const laporan = await laporanModel.findAll({
+        include: [
+          {model:kecamatanModel},
+          {model:laporanKategoriModel},
+          {model:usersModel,attributes: { exclude: ["password", "refresh_token"]}}],
+        where: {          
+          '$users.Users_Laporan.status$':true,
+          [Op.or]: [
+            {
+              tanggal: {
+                [Op.between]:  [`%${id}-01$%`, `%${id}-31$%`],
+              }
+            },
+        ],
+          },
+        order: [['tanggal', 'DESC']],
+        limit: limit,
+        offset: offset,
+        subQuery:false
+      });
+      res.status(200).json({ laporan: laporan, currentPage: page, id: id, limit: limit, offset: offset, totalPages: totalPages, totalRows: totalRows });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 
 export const getAllLaporanBySearch = async (req, res) => {
   try {

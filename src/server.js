@@ -11,11 +11,9 @@ import identitasKorbanRoutes from './routes/identitasKorban.js'
 import skalaTriaseRoutes from './routes/skalaTriase.js'
 import cookieParser from 'cookie-parser';
 import santunanRoutes from './routes/santunan.js';
-import identitasSantunanModel from './models/identitasSantunanModel.js';
 dotenv.config();
 
 const PORT = process.env.PORT || 5000
-
 const app = express();
 
 app.use(cors(
@@ -36,7 +34,6 @@ app.use(laporanKategoriRoutes)
 app.use(identitasKorbanRoutes)
 app.use(skalaTriaseRoutes)
 app.use(santunanRoutes)
-app.use(identitasSantunanModel)
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

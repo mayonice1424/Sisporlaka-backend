@@ -8,5 +8,4 @@ router.get("/icd-10/:id", getIcd10ById);
 router.delete("/icd-10/:id", deleteIcd10);
 router.patch("/icd-10/:id", updateIcd10);
 
-
 export default router;

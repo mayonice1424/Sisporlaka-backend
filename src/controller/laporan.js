@@ -44,7 +44,7 @@ export const createNewLaporan = async (req, res) => {
   }
 }
 
-export const createDetailLaporanPolisi = async (req, res) => {
+export const createDetailLaporan = async (req, res) => {
   const { identitas_korban, identitas_pengemudi, id_laporan } = req.body;
 
   try {
@@ -272,36 +272,74 @@ export const deleteLaporanPengemudi = async (req, res) => {
 export const getLaporanByBulan = async (req, res) => {
   try {
     const search = req.query.search || '';
-    const laporan = await laporanModel.findAll({
-      include : [kecamatanModel,usersModel],
-      attributes: [
-        [
-          sequelize.literal("CONCAT(EXTRACT(YEAR FROM tanggal), '-', EXTRACT(MONTH FROM tanggal))"),
-          'data'
-        ],
-          'id_kecamatan', [sequelize.fn('COUNT', 'id_kecamatan'), 'count'],
-          'tanggal',
-      ],
-      group: ['data','id_kecamatan'],
-      order: sequelize.literal('data DESC'),
-      where: {
-        '$users.Users_Laporan.status$':true,
-        [Op.and]: [
-          {
+
+    const laporan = await kecamatanModel.findAll({
+      include: [
+        {
+          model: laporanModel,
+          attributes: [
+            [sequelize.literal('SUM(CASE WHEN `laporans->users->Users_Laporan`.`status` = true THEN 1 ELSE 0 END)'), 'count'],
+          ],
+          include: [
+            {
+              model: usersModel,
+              attributes: [],
+              as: 'users',
+              through: { attributes: [] },
+            },
+          ],
+          where: {
             tanggal: {
-              [Op.between]:  [`%${search}-01$%`, `%${search}-31$%`],
+              [Op.between]: [`%${search}-01$%`, `%${search}-31$%`],
             },
           },
+          required: false,
+        },
+      ],
+      attributes: [
+        [
+          sequelize.literal("CONCAT(EXTRACT(YEAR FROM `Laporans`.`tanggal`), '-', EXTRACT(MONTH FROM `Laporans`.`tanggal`))"),
+          'data'
         ],
-    },
-    subQuery:false
-  }).then((response) => {
-    res.status(200).json({ laporan: response, search: search });
+        'id_kecamatan',
+        'nama_kecamatan',
+        [sequelize.fn('COUNT', sequelize.col('Laporans.id_kecamatan')), 'count'],
+        [sequelize.col('Laporans.tanggal'), 'tanggal'],
+      ],
+      group: ['data', 'id_kecamatan'],
+      order: sequelize.literal('id_kecamatan ASC'),
+      raw: true,
+      subQuery: false,
     });
+    const laporanWithDefault = laporan.map((item) => {
+      const kecamatan = item;
+      if (!kecamatan['Laporans.count']) {
+        kecamatan['Laporans.count'] = 0;
+      }
+      return kecamatan;
+    });
+    // convert laporans.count to laporans_count from laporanWithDefault
+    const laporanWithDefault2 = laporanWithDefault.map((item) => {
+      const kecamatan = item;
+      kecamatan.laporans_count = kecamatan['laporans.count'];
+      delete kecamatan['laporans.count'];
+      return kecamatan;
+    });
+    res.status(200).json({ laporan: laporanWithDefault2, search: search });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
+
+
+
+
+
+
+
+
+
 
 export const getLaporanByTahunBulan = async (req, res) => {
     try {
@@ -348,6 +386,32 @@ export const getLaporanByTahunBulan = async (req, res) => {
           '$users.Users_Laporan.status$':true,
       },
       limit:limit,
+      subQuery:false
+    }).then((response) => {
+      res.status(200).json({ laporan: response });
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+
+  export const getLaporanByTahunBulanUnlimited = async (req, res) => {
+    try {
+      const laporan = await laporanModel.findAll({
+        include : [
+         {model:usersModel, attributes:{ exclude:['password','id_users','role','username','refresh_token','createdAt']} },
+        ],
+        attributes: [
+          [
+            sequelize.literal("CONCAT(EXTRACT(YEAR FROM tanggal), '-', EXTRACT(MONTH FROM tanggal))"),
+            'data'
+          ],
+        ],
+        group: ['data'],
+        order: sequelize.literal('data DESC'),
+        where: {
+          '$users.Users_Laporan.status$':true,
+      },
       subQuery:false
     }).then((response) => {
       res.status(200).json({ laporan: response });
@@ -882,9 +946,8 @@ export const deleteLaporan = async (req, res) => {
       });
       const deleteIdentitasPelaku = await laporanPengemudiModel.destroy({
         where: { id_laporan: id },
-      }).then((result) => {
-        res.status(200).json({ message: "Laporan berhasil dihapus" });
-      });
+      })
+        return res.status(200).send("Laporan berhasil dihapus");
     }
     throw new Error("Laporan not found");
   } catch (error) {
@@ -989,9 +1052,12 @@ export const countLaporanByKecamatanValidated = async (req, res) => {
         '$users.Users_Laporan.status$':true,
     },
     subQuery:false
-
   });
+  if(count == null){
+    res.status(200).json({ count : 0});
+  }else{
     res.status(200).json({ count : count});
+  }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -1010,97 +1076,15 @@ export const countLaporanByKecamatanUnValidated = async (req, res) => {
     subQuery:false
 
   });
+  if(count == null){
+    res.status(200).json({ count : 0});
+  }else{
     res.status(200).json({ count : count});
+  }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
-
-// export const patchLaporan = async (req, res) => {
-//   const { id } = req.params;
-//   const { id_users } = req.body;
-//   const {status} = false;
-//   const { judul_kejadian, tanggal, waktu, lokasi, kerugian_materil, plat_ambulance, penyebab, keterangan, id_kecamatan } = req.body;
-//   try {
-//     const laporan = await laporanModel.update({
-//       judul_kejadian,
-//       tanggal,
-//       waktu,
-//       lokasi,
-//       kerugian_materil,
-//       plat_ambulance,
-//       penyebab,
-//       keterangan,
-//       id_kecamatan
-//     }, {
-//       where: {
-//         id_laporan: id
-//       }
-//     });
-//     const usersLaporan = await usersLaporanModel.findOrCreate({
-//       where: {
-//         id_users,
-//         id_laporan: id,
-//       },
-//       defaults: {
-//         id_users,
-//         id_laporan: id,
-//         status: false  
-//       },
-//     });
-//     if (!usersLaporan[1]) { 
-//       await usersLaporanModel.update({ status: false }, {
-//         where: {
-//           id_users_laporan: usersLaporan[0].id_users_laporan
-//         }
-//       });
-//       usersLaporan[0].status = false;
-//     }
-//     res.status(201).json({
-//       message: "Laporan berhasil diubah",
-//       laporan,
-//       usersLaporan
-//     });
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
-// export const patchLaporan = async (req, res) => {
-//   const { id } = req.params;
-//   const { id_users } = req.body;
-//   const {status} = false;
-//   const { judul_kejadian, tanggal, waktu, lokasi, kerugian_materil, plat_ambulance, penyebab, keterangan, id_kecamatan } = req.body;
-//   try {
-//     const laporan = await laporanModel.update({
-//       judul_kejadian,
-//       tanggal,
-//       waktu,
-//       lokasi,
-//       kerugian_materil,
-//       plat_ambulance,
-//       penyebab,
-//       keterangan,
-//       id_kecamatan
-//     }, {
-//       where: {
-//         id_laporan: id
-//       }
-//     });
-//     const usersLaporan = await usersLaporanModel.create({
-//         id_users : id_users,
-//         id_laporan: id,
-//         status: false
-//     });
-//     res.status(201).json({
-//       message: "Laporan berhasil diubah",
-//       laporan,
-//       usersLaporan
-//     });
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
 
 
 export const getUsersLaporan = async (req, res) => {
@@ -1178,58 +1162,3 @@ return res.status(500).send(error.message);
         return res.status(200).json({ message: 'Identitas Santunan berhasil diubah' });
       }
     };
-          
-
-
-
-
-
-// const { judul_kejadian, tanggal, waktu, lokasi, kerugian_materil, plat_ambulance, penyebab, keterangan,id_kecamatan } = req.body;
-//   const {id_users,status} = req.body;
-//   const {id_laporan_kategori} = req.body;
-//   const {nama,jenis_kelamin,umur, alamat, NIK, nama_rumah_sakit,nomor_rekam_medis} = req.body;
-//   const { id_laporan } = req.params;
-//   const { kode_icd_10 } = req.body;
-//   const { id_luka } = req.body;
-//   const { id_skala_triase } = req.body;
-//   try {
-//     const laporan = await laporanModel.create({
-//       judul_kejadian: judul_kejadian,
-//       tanggal: tanggal,
-//       waktu: waktu,
-//       lokasi: lokasi,
-//       kerugian_materil: kerugian_materil,
-//       plat_ambulance: plat_ambulance,
-//       penyebab: penyebab,
-//       keterangan: keterangan,
-//       id_kecamatan: id_kecamatan,
-//       id_laporan_kategori: id_laporan_kategori
-//     })
-//     const userLaporan = await usersLaporanModel.create({
-//       id_laporan: laporan.id_laporan,
-//       id_users: id_users,
-//       status: status,
-//     })
-//     const identitasKorban = await identitasKorbanModel.create({
-//       id_laporan: laporan.id_laporan,
-//       nama: nama,
-//       jenis_kelamin: jenis_kelamin,
-//       umur: umur,
-//       alamat: alamat,
-//       NIK: NIK,
-//       nama_rumah_sakit: nama_rumah_sakit,
-//       nomor_rekam_medis: nomor_rekam_medis,
-//       kode_icd_10: kode_icd_10,
-//       id_luka: id_luka,
-//       id_skala_triase: id_skala_triase
-//     }) 
-//     .then((response) => {
-//     res.status(201).json({
-//       message: "Laporan berhasil dibuat",
-//       id_laporan: response.id_laporan
-//     });
-//   })} catch (error) {
-//     res.status(500).json({ error: error.message });  
-//   }
-// }
-

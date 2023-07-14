@@ -303,8 +303,8 @@ export const getLaporanByBulan = async (req, res) => {
         ],
         'id_kecamatan',
         'nama_kecamatan',
-        [sequelize.fn('COUNT', sequelize.col('Laporans.id_kecamatan')), 'count'],
-        [sequelize.col('Laporans.tanggal'), 'tanggal'],
+        [sequelize.fn('COUNT', sequelize.col('laporans.id_kecamatan')), 'count'],
+        [sequelize.col('laporans.tanggal'), 'tanggal'],
       ],
       group: ['data', 'id_kecamatan'],
       order: sequelize.literal('id_kecamatan ASC'),
@@ -1011,7 +1011,7 @@ export const countLaporan = async (req, res) => {
       {include : 
         [{model:laporanModel,include:[usersModel]}],
         where: {
-          '$Laporan.users.Users_Laporan.status$':true,
+          '$laporan.users.Users_Laporan.status$':true,
       },
       subQuery:false
       }

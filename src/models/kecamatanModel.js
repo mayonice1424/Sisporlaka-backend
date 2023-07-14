@@ -1,5 +1,5 @@
 import db from '../config/database.js';
-import { Sequelize } from "sequelize";
+import Sequelize from "sequelize";
 
 const { DataTypes } = Sequelize;
 const kecamatanModel = db.define('Kecamatan', {
